@@ -1,0 +1,72 @@
+before_script:
+  - $PIP --version
+  - $PIP install -e procgen-build
+
+jobs:
+  include:
+    - name: "Linux Development"
+      os: linux
+      language: python
+      python: 3.7
+      sudo: required
+      script: python -u -m procgen_build.dev_test
+      env:
+        - PIP=pip
+
+    - name: "Linux Package"
+      os: linux
+      dist: bionic  # Ubuntu 18.04 LTS, the packages are built inside docker so this doesn't affect much
+      language: python
+      python: 3.7
+      sudo: required
+      services:
+        - docker
+      script: python -u -m procgen_build.build_package
+      env:
+        - PIP=pip
+
+    - name: "Mac Development"
+      os: osx
+      osx_image: xcode11.2  # MacOS X 10.14 (https://docs.travis-ci.com/user/reference/osx/#macos-version)
+      language: generic
+      before_install:
+        - curl https://pyenv.run | bash
+        - pyenv install 3.7.5
+        - pyenv global 3.7.5
+      script: python -u -m procgen_build.dev_test
+      env:
+        - PIP=pip3
+        - PATH=/Users/travis/.pyenv/shims:$PATH
+
+    - name: "Mac Package"
+      os: osx
+      osx_image: xcode11.2
+      language: generic
+      before_install:
+        - curl https://pyenv.run | bash
+        - pyenv install 3.7.5
+        - pyenv global 3.7.5
+      script: python3 -u -m procgen_build.build_package
+      env:
+        - PIP=pip3
+        - PATH=/Users/travis/.pyenv/shims:$PATH
+
+    - name: "Windows Development"
+      os: windows
+      language: shell
+      before_install:
+        - choco install python3 --version 3.7.5 --no-progress --yes
+      env:
+        - PIP=pip
+        - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      script: python -u -m procgen_build.dev_test
+
+    - name: "Windows Package"
+      os: windows
+      language: shell
+      before_install:
+        - choco install python3 --version 3.7.5 --no-progress --yes
+      env:
+        - PIP=pip
+        - PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      script: python -u -m procgen_build.build_package

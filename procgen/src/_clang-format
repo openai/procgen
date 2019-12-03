@@ -1,0 +1,6 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+SortIncludes: false
+AllowShortFunctionsOnASingleLine: InlineOnly
+ColumnLimit: 0
