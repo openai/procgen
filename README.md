@@ -41,7 +41,7 @@ pip install procgen
 To try an environment out interactively:
 
 ```
-python -m procgen.interactive --env_name coinrun
+python -m procgen.interactive --env-name coinrun
 ```
 
 The keys are: left/right/up/down + q, w, e, a, s, d for the different (environment-dependent) actions.  Your score is displayed as "episode_return" on the right.  At the end of an episode, you can see your final "episode_return" as well as "level_completed" which will be `1` if you successfully completed the level.
@@ -133,7 +133,7 @@ The environment code is in C++ and is compiled into a shared library loaded by p
 * Copy [`src/games/bigfish.cpp`](procgen/src/games/bigfish.cpp) to `src/games/<name>.cpp`
 * Replace `BigFish` with `<name>` and `"bigfish"` with `"<name>"` in your cpp file
 * Add `src/games/<name>.cpp` to [`CMakeLists.txt`](procgen/CMakeLists.txt)
-* Run `python -m procgen.interactive --env_name <name>` to test it out
+* Run `python -m procgen.interactive --env-name <name>` to test it out
 
 # Changelog
 
