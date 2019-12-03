@@ -84,8 +84,9 @@ class Interactive(abc.ABC):
             win_width *= 2
             win_height *= 2
 
+        self._info_width = win_width // 2
         if display_info:
-            win_width *= 1.5
+            win_width += self._info_width
         win = pyglet.window.Window(width=win_width, height=win_height)
 
         self._key_handler = pyglet.window.key.KeyStateHandler()
@@ -129,7 +130,6 @@ class Interactive(abc.ABC):
         self._sim_time = 0
         self._max_sim_frames_per_update = 4
 
-        self._info_width = self._win.width // 3
         self._info_label = pyglet.text.Label(
             "<label>",
             font_name="Courier New",
