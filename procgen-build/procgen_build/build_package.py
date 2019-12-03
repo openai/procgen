@@ -36,11 +36,11 @@ def init_vsvars():
 
 def setup_google_credentials():
     # brew install travis
-    # travis login --com
+    # travis login --org
     # gcloud iam service-accounts create procgen-travis-ci --project <project>
     # gcloud iam service-accounts keys create /tmp/key.json --iam-account procgen-travis-ci@<project>.iam.gserviceaccount.com
     # gsutil iam ch serviceAccount:procgen-travis-ci@<project>.iam.gserviceaccount.com:objectAdmin gs://{GCS_BUCKET}
-    # travis encrypt-file /tmp/key.json
+    # travis encrypt-file --org /tmp/key.json
     input_path = os.path.join(SCRIPT_DIR, "key.json.enc")
     output_path = os.path.join(os.getcwd(), "key.json")
     if "encrypted_d853b3b05b79_key" not in os.environ:
