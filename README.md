@@ -2,11 +2,13 @@
 
 # Procgen Benchmark
 
+#### [[Blog Post]](https://openai.com/blog/procgen-benchmark/) [[Paper]](https://cdn.openai.com/procgen.pdf)
+
 16 simple-to-use procedurally-generated environments which provide a direct measure of how quickly a reinforcement learning agent learns generalizable skills.  The environments run at high speed (thousands of steps per second) on a single core.
 
-<img src="screenshots/procgen.gif">
+![procgen games](screenshots/procgen.gif?raw=true)
 
-These environments are associated with the paper [Leveraging Procedural Generation to Benchmark Reinforcement Learning](https://openai.com/blog/procgen-benchmark/) [(citation)](#citation).
+These environments are associated with the paper [Leveraging Procedural Generation to Benchmark Reinforcement Learning](https://cdn.openai.com/procgen.pdf) [(citation)](#citation).
 
 Supported platforms:
 
