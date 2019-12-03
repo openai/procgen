@@ -1,8 +1,10 @@
 **Status:** Maintenance (expect bug fixes and minor updates)
 
-# Procgen Environments
+# Procgen Benchmark
 
-Procedurally generated 2d video-game-like environments.  These environments run at high speed (thousands of steps per second on a single core).  These environments are used in the paper [Leveraging Procedural Generation to Benchmark Reinforcement Learning](https://openai.com/blog/procgen-benchmark/) [(citation)](#citation).
+16 simple-to-use procedurally-generated environments which provide a direct measure of how quickly a reinforcement learning agent learns generalizable skills.  The environments run at high speed (thousands of steps per second) on a single core.
+
+These environments are associated with the paper [Leveraging Procedural Generation to Benchmark Reinforcement Learning](https://openai.com/blog/procgen-benchmark/) [(citation)](#citation).
 
 Supported platforms:
 
