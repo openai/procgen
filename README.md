@@ -27,10 +27,9 @@ Supported CPUs:
 First make sure you have a supported version of python:
 
 ```
-# this should be >= 3.6 and <= 3.8
-python --version 
-# check for 64 bit python 
-python -c "import platform; assert platform.architecture()[0] == '64bit', 'python is not 64-bit'"
+# run these commands to check for the correct python version
+python -c "import sys; assert (3,6,0) <= sys.version_info <= (3,9,0), 'python is incorrect version'; print('ok')"
+python -c "import platform; assert platform.architecture()[0] == '64bit', 'python is not 64-bit'; print('ok')"
 ```
 
 To install the wheel:
@@ -94,7 +93,7 @@ Here are the 16 environments:
 
 ## Environment Options
 
-* `env_name` - Name of environment, or comma-separate list of environment names to instantiate as each env in the VecEnv, full list available in `procgen.ENV_NAMES`
+* `env_name` - Name of environment, or comma-separate list of environment names to instantiate as each env in the VecEnv.
 * `num_levels` - The number of unique levels that can be generated. Set to 0 to use unlimited levels.
 * `start_level` - The lowest seed that will be used to generated levels. 'start_level' and 'num_levels' fully specify the set of possible levels.
 * `paint_vel_info` - Paint player velocity info in the top left corner. Only supported by certain games.
