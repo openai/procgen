@@ -135,6 +135,10 @@ The environment code is in C++ and is compiled into a shared library loaded by p
 * Add `src/games/<name>.cpp` to [`CMakeLists.txt`](procgen/CMakeLists.txt)
 * Run `python -m procgen.interactive --env_name <name>` to test it out
 
+# Changelog
+
+See [CHANGES](CHANGES.md) for changes present in each release.
+
 # Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for information on contributing.
