@@ -4,7 +4,7 @@
 
 #### [[Blog Post]](https://openai.com/blog/procgen-benchmark/) [[Paper]](https://cdn.openai.com/procgen.pdf)
 
-16 simple-to-use procedurally-generated environments which provide a direct measure of how quickly a reinforcement learning agent learns generalizable skills.  The environments run at high speed (thousands of steps per second) on a single core.
+16 simple-to-use procedurally-generated [gym](https://github.com/openai/gym) environments which provide a direct measure of how quickly a reinforcement learning agent learns generalizable skills.  The environments run at high speed (thousands of steps per second) on a single core.
 
 <img src="https://raw.githubusercontent.com/openai/procgen/master/screenshots/procgen.gif">
 
