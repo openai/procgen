@@ -80,7 +80,7 @@ setup(
         "filelock~=3.0",
         "cffi~=1.12",
         # optional, used for interactive mode
-        "pyglet==1.3.2",
+        "pyglet~=1.4.8",
         "imageio~=2.6",
         "imageio-ffmpeg~=0.3",
     ],
