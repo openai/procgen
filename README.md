@@ -125,7 +125,7 @@ conda env update --name procgen --file environment.yml
 conda activate procgen
 pip install -e .
 # this should say "building procgen...done"
-python -c 'from procgen import ProcgenEnv; ProcgenEnv(num_envs=1, env_name="coinrun")'
+python -c "from procgen import ProcgenEnv; ProcgenEnv(num_envs=1, env_name='coinrun')"
 # this should create a window where you can play the coinrun environment
 python -m procgen.interactive
 ```
