@@ -17,18 +17,18 @@ BUILD_VERSION = 11
 
 
 def cache_folder(name, dirpath, options, build_fn):
+    if os.path.exists(dirpath):
+        print(f"cache for {name} found locally")
+        return
+    
+    options_hash = hashlib.md5("|".join(options).encode("utf8")).hexdigest()
+    cache_path = bf.join(f"gs://{GCS_BUCKET}", "cache", f"{name}-{options_hash}.tar")
     if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
         # we don't have any credentials to do the caching, always build in this case
         print(f"building without cache for {name}")
         start = time.time()
         build_fn()
         print(f"build elapsed {time.time() - start}")
-        return
-
-    options_hash = hashlib.md5("|".join(options).encode("utf8")).hexdigest()
-    cache_path = bf.join(f"gs://{GCS_BUCKET}", "cache", f"{name}-{options_hash}.tar")
-    if os.path.exists(dirpath):
-        print(f"cache for {name} found locally")
     elif bf.exists(cache_path):
         print(f"downloading cache for {name}: {cache_path}")
         start = time.time()
