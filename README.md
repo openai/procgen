@@ -116,7 +116,7 @@ Here are the 16 environments:
 
 # Build from Source
 
-If you want to change the environments or create new ones, you should build from source.  You can get miniconda from https://docs.conda.io/en/latest/miniconda.html if you don't have it, or install the dependencies from [`environment.yml`](environment.yml) manually.
+If you want to change the environments or create new ones, you should build from source.  You can get miniconda from https://docs.conda.io/en/latest/miniconda.html if you don't have it, or install the dependencies from [`environment.yml`](environment.yml) manually.  On Windows you will also need "Visual Studio 15 2017" installed.
 
 ```
 git clone git@github.com:openai/procgen.git
@@ -125,7 +125,7 @@ conda env update --name procgen --file environment.yml
 conda activate procgen
 pip install -e .
 # this should say "building procgen...done"
-python -c 'from procgen import ProcgenEnv; ProcgenEnv(num_envs=1, env_name="coinrun")'
+python -c "from procgen import ProcgenEnv; ProcgenEnv(num_envs=1, env_name='coinrun')"
 # this should create a window where you can play the coinrun environment
 python -m procgen.interactive
 ```
