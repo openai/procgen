@@ -10,6 +10,12 @@
 
 These environments are associated with the paper [Leveraging Procedural Generation to Benchmark Reinforcement Learning](https://cdn.openai.com/procgen.pdf) [(citation)](#citation).  The code for running some experiments from the paper is in the [train-procgen](https://github.com/openai/train-procgen) repo.
 
+Compared to [Gym Retro](https://github.com/openai/retro), these environments are:
+
+* Faster: Gym Retro environments are already fast, but Procgen environments can run >4x faster.
+* Non-deterministic: Gym Retro environments are always the same, so you can memorize a sequence of actions that will get the highest reward.  Procgen environments are randomized so this is not possible.
+* Customizable: If you install from source, you can perform experiments where you change the environments, or build your own environments.  The environment-specific code for each environment is often less than 300 lines.  This is almost impossible with Gym Retro.
+
 Supported platforms:
 
 - Windows 10
