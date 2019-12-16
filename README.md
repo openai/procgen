@@ -113,6 +113,20 @@ Here are the 16 environments:
 * `use_sequential_levels` - When you reach the end of a level, the episode is ended and a new level is selected.  If `use_sequential_levels` is set to `True`, reaching the end of a level does not end the episode, and the seed for the new level is derived from the current level seed.  If you combine this with `start_level=<some seed>` and `num_levels=1`, you can have a single linear series of levels similar to a gym-retro or ALE game.
 * `distribution_mode` - What variant of the levels to use, the options are `"easy", "hard", "extreme", "memory", "exploration"`.  All games support `"easy"` and `"hard"`, while other options are game-specific.  The default is `"hard"`.  Switching to `"easy"` will reduce the number of timesteps required to solve each game and is useful for testing or when working with limited compute resources.
 
+Here's how to set the options:
+
+```
+import gym
+env = gym.make("procgen:procgen-coinrun-v0", num_levels=1, start_level=1)
+```
+
+For the vectorized environment:
+
+```
+from procgen import ProcgenEnv
+venv = ProcgenEnv(num_envs=1, env_name="coinrun", num_levels=1, start_level=1)
+```
+
 ## Notes
 
 * You should depend on a specific version of this library (using `==`) for your experiments to ensure they are reproducible.  You can get the current installed version with `pip show procgen`.
