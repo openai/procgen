@@ -10,6 +10,12 @@
 
 These environments are associated with the paper [Leveraging Procedural Generation to Benchmark Reinforcement Learning](https://cdn.openai.com/procgen.pdf) [(citation)](#citation).  The code for running some experiments from the paper is in the [train-procgen](https://github.com/openai/train-procgen) repo.
 
+Compared to [Gym Retro](https://github.com/openai/retro), these environments are:
+
+* Faster: Gym Retro environments are already fast, but Procgen environments can run >4x faster.
+* Non-deterministic: Gym Retro environments are always the same, so you can memorize a sequence of actions that will get the highest reward.  Procgen environments are randomized so this is not possible.
+* Customizable: If you install from source, you can perform experiments where you change the environments, or build your own environments.  The environment-specific code for each environment is often less than 300 lines.  This is almost impossible with Gym Retro.
+
 Supported platforms:
 
 - Windows 10
@@ -106,6 +112,20 @@ Here are the 16 environments:
 * `center_agent` - Determines whether observations are centered on the agent or display the full level. Override at your own risk.
 * `use_sequential_levels` - When you reach the end of a level, the episode is ended and a new level is selected.  If `use_sequential_levels` is set to `True`, reaching the end of a level does not end the episode, and the seed for the new level is derived from the current level seed.  If you combine this with `start_level=<some seed>` and `num_levels=1`, you can have a single linear series of levels similar to a gym-retro or ALE game.
 * `distribution_mode` - What variant of the levels to use, the options are `"easy", "hard", "extreme", "memory", "exploration"`.  All games support `"easy"` and `"hard"`, while other options are game-specific.  The default is `"hard"`.  Switching to `"easy"` will reduce the number of timesteps required to solve each game and is useful for testing or when working with limited compute resources.
+
+Here's how to set the options:
+
+```
+import gym
+env = gym.make("procgen:procgen-coinrun-v0", start_level=0, num_levels=1)
+```
+
+For the vectorized environment:
+
+```
+from procgen import ProcgenEnv
+venv = ProcgenEnv(num_envs=1, env_name="coinrun", start_level=0, num_levels=1)
+```
 
 ## Notes
 
