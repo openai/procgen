@@ -159,6 +159,7 @@ Please cite using the following bibtex entry:
 @article{cobbe2019procgen,
   title={Leveraging Procedural Generation to Benchmark Reinforcement Learning},
   author={Cobbe, Karl and Hesse, Christopher and Hilton, Jacob and Schulman, John},
+  journal={arXiv preprint arXiv:1912.01588},
   year={2019}
 }
 ```
