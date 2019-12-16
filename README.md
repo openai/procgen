@@ -117,14 +117,14 @@ Here's how to set the options:
 
 ```
 import gym
-env = gym.make("procgen:procgen-coinrun-v0", num_levels=1, start_level=1)
+env = gym.make("procgen:procgen-coinrun-v0", start_level=0, num_levels=1)
 ```
 
 For the vectorized environment:
 
 ```
 from procgen import ProcgenEnv
-venv = ProcgenEnv(num_envs=1, env_name="coinrun", num_levels=1, start_level=1)
+venv = ProcgenEnv(num_envs=1, env_name="coinrun", start_level=0, num_levels=1)
 ```
 
 ## Notes
