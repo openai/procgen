@@ -261,8 +261,9 @@ class Interactive(abc.ABC):
             return
         
         gl.glBindTexture(gl.GL_TEXTURE_2D, self._texture_id)
+        image_bytes = self._image.tobytes()
         video_buffer = ctypes.cast(
-            self._image.tobytes(), ctypes.POINTER(ctypes.c_short)
+            image_bytes, ctypes.POINTER(ctypes.c_short)
         )
         gl.glTexSubImage2D(
             gl.GL_TEXTURE_2D,
