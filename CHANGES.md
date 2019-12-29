@@ -4,7 +4,7 @@
 
 * changed pyglet dependency to `pyglet~=1.4.8`
 * fix issue with procgen thinking it was installed in development mode and attempting to build when installed from a pypi package
-* make procgen fork safe when `num_threads=0`
+* make procgen more fork safe when `num_threads=0`
 
 ## 0.9.2
 
