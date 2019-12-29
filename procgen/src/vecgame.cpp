@@ -191,6 +191,7 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
     std::call_once(global_init_flag, global_init, rand_seed,
                    resource_root);
 
+    fassert(num_threads >= 0);
     threads.resize(num_threads);
     for (int t = 0; t < num_threads; t++) {
         threads[t] = std::thread(
@@ -346,8 +347,13 @@ void VecGame::step_async(const std::vector<int32_t> &acts,
             game->reward_ptr = &rews[e];
             game->done_ptr = &dones[e];
             fassert(!game->is_waiting_for_step);
-            game->is_waiting_for_step = true;
-            pending_games.push_back(game);
+            if (threads.size() == 0) {
+                // special case for no threads
+                game->step();
+            } else {
+                game->is_waiting_for_step = true;
+                pending_games.push_back(game);
+            }
         }
     }
     // at this point all games belong to the stepping threads
@@ -369,6 +375,10 @@ VecGame::~VecGame() {
 }
 
 void VecGame::wait_for_stepping_threads() {
+    if (threads.size() == 0) {
+        return;
+    }
+
     std::unique_lock<std::mutex> lock(stepping_thread_mutex);
     while (1) {
         bool all_steps_completed = true;

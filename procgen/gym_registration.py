@@ -15,7 +15,7 @@ class RemoveDictObs(ObservationWrapper):
 
 
 def make_env(**kwargs):
-    venv = ProcgenEnv(num_envs=1, **kwargs)
+    venv = ProcgenEnv(num_envs=1, num_threads=0, **kwargs)
     env = Scalarize(venv)
     env = RemoveDictObs(env, key="rgb")
     return env
