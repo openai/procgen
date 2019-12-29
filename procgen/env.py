@@ -82,12 +82,13 @@ class BaseProcgenEnv(CVecEnv):
             resource_root = os.path.join(SCRIPT_DIR, "data", "assets") + os.sep
             assert os.path.exists(resource_root)
 
-        if "site-packages" in SCRIPT_DIR:
-            assert any([os.path.exists(os.path.join(SCRIPT_DIR, "build", name)) for name in ["libenv.so", "libenv.dylib", "env.dll"]]), "package is installed, but the compiled environment library is missing"
-            assert not debug, "debug has no effect for pre-compiled library"
-            lib_dir = os.path.join(SCRIPT_DIR, "build")
+        lib_dir = os.path.join(SCRIPT_DIR, "assets", "prebuilt")
+        for name in ["libenv.so", "libenv.dylib", "env.dll"]:
+            if name in os.listdir(lib_dir):
+                assert not debug, "debug has no effect for pre-compiled library"
+                break
         else:
-            # only compile if we're not an installed module
+            # only compile if we don't find a pre-built binary
             lib_dir = build(debug=debug)
 
         self.combos = self.get_combos()
