@@ -7,6 +7,7 @@ import glob
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PACKAGE_ROOT = os.path.join(SCRIPT_DIR, "procgen")
+README = open(os.path.join(SCRIPT_DIR, "README.md")).read()
 
 # dynamically determine version number based on git commit
 version = open(os.path.join(PACKAGE_ROOT, "version.txt"), "r").read().strip()
@@ -101,5 +102,7 @@ setup(
 
     author="OpenAI",
     description="Procedurally Generated Game-Like RL Environments",
+    long_description=README,
+    long_description_content_type="text/markdown",
     url="https://github.com/openai/procgen",
 )
