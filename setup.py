@@ -60,7 +60,7 @@ class custom_build_ext(build_ext):
         # the on-demand build
         for filename in ["libenv.so", "libenv.dylib", "env.dll"]:
             src = os.path.join(lib_dir, filename)
-            dst = os.path.join(self.build_lib, "procgen", "assets", "prebuilt", filename)
+            dst = os.path.join(self.build_lib, "procgen", "data", "prebuilt", filename)
             if os.path.exists(src):
                 os.makedirs(os.path.dirname(dst), exist_ok=True)
                 os.replace(src, dst)
@@ -89,9 +89,6 @@ setup(
         "procgen": [
             "version.txt",
             "libenv.h",
-            "assets/prebuilt/libenv.dylib",
-            "assets/prebuilt/libenv.so",
-            "assets/prebuilt/env.dll",
             *asset_relpaths,
         ]
     },

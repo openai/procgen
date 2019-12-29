@@ -82,11 +82,10 @@ class BaseProcgenEnv(CVecEnv):
             resource_root = os.path.join(SCRIPT_DIR, "data", "assets") + os.sep
             assert os.path.exists(resource_root)
 
-        lib_dir = os.path.join(SCRIPT_DIR, "assets", "prebuilt")
-        for name in ["libenv.so", "libenv.dylib", "env.dll"]:
-            if name in os.listdir(lib_dir):
-                assert not debug, "debug has no effect for pre-compiled library"
-                break
+        lib_dir = os.path.join(SCRIPT_DIR, "data", "prebuilt")
+        if os.exists(lib_dir):
+            assert any([os.path.exists(os.path.join(lib_dir, name)) for name in ["libenv.so", "libenv.dylib", "env.dll"]]), "package is installed, but the prebuilt environment library is missing"
+            assert not debug, "debug has no effect for pre-compiled library"
         else:
             # only compile if we don't find a pre-built binary
             lib_dir = build(debug=debug)
