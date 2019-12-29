@@ -30,6 +30,9 @@ def init_vsvars():
     os.remove(env_bat_file_path)
     os.remove(env_txt_file_path)
     for line in lines:
+        if "=" not in line:
+            print(f"invalid line {repr(line)}")
+            continue
         k, v = line.split("=", 1)
         os.environ[k] = v
 
