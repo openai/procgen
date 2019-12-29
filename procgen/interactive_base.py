@@ -236,7 +236,8 @@ class Interactive(abc.ABC):
 
                 if done:
                     print(f"final info={self._last_info}")
-                    self._env.reset()
+                    obs = self._env.reset()
+                    self._image = self.get_image(obs, self._env)
                     self._episode_steps = 0
                     self._episode_return = 0
                     self._prev_episode_return = 0
