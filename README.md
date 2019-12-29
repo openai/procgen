@@ -131,7 +131,7 @@ venv = ProcgenEnv(num_envs=1, env_name="coinrun", start_level=0, num_levels=1)
 
 * You should depend on a specific version of this library (using `==`) for your experiments to ensure they are reproducible.  You can get the current installed version with `pip show procgen`.
 * This library does not require or make use of GPUs.
-* While the library should be thread safe, each individual environment instance should only be used from a single thread.
+* While the library should be thread safe, each individual environment instance should only be used from a single thread.  The library is not fork safe unless you set `num_threads=0`.  Even if you do that, `Qt` is not guaranteed to be fork safe, so you should probably create the environment after forking or not use fork at all.
 * Calling `reset()` early will not do anything, please re-create the environment if you want to reset it early.
 
 # Build from Source
