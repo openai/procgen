@@ -134,7 +134,7 @@ venv = ProcgenEnv(num_envs=1, env_name="coinrun", start_level=0, num_levels=1)
 * While the library should be thread safe, each individual environment instance should only be used from a single thread.  The library is not fork safe unless you set `num_threads=0`.  Even if you do that, `Qt` is not guaranteed to be fork safe, so you should probably create the environment after forking or not use fork at all.
 * Calling `reset()` early will not do anything, please re-create the environment if you want to reset it early.
 
-# Build from Source
+# Install from Source
 
 If you want to change the environments or create new ones, you should build from source.  You can get miniconda from https://docs.conda.io/en/latest/miniconda.html if you don't have it, or install the dependencies from [`environment.yml`](environment.yml) manually.  On Windows you will also need "Visual Studio 15 2017" installed.
 
@@ -154,10 +154,14 @@ The environment code is in C++ and is compiled into a shared library loaded by p
 
 # Create a new environment
 
+Once you have installed from source, you can customize an existing environment or make a new environment of your own.  If you want to create a fast C++ 2D environment, you can fork this repo and do the following:
+
 * Copy [`src/games/bigfish.cpp`](procgen/src/games/bigfish.cpp) to `src/games/<name>.cpp`
 * Replace `BigFish` with `<name>` and `"bigfish"` with `"<name>"` in your cpp file
 * Add `src/games/<name>.cpp` to [`CMakeLists.txt`](procgen/CMakeLists.txt)
 * Run `python -m procgen.interactive --env-name <name>` to test it out
+
+This repo includes a travis configuration that will compile your environment and build python wheels for easy installation.  In order to have this build more quickly by caching the Qt compilation, you will want to configure a GCS bucket in [common.py](https://github.com/openai/procgen/blob/master/procgen-build/procgen_build/common.py#L5) and [setup service account credentials](https://github.com/openai/procgen/blob/master/procgen-build/procgen_build/build_package.py#L41).
 
 # Changelog
 
