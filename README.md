@@ -48,6 +48,8 @@ To install the wheel:
 pip install procgen
 ```
 
+If you get an error like `"Could not find a version that satisfies the requirement procgen"`, please upgrade pip: `pip install --upgrade pip`.
+
 To try an environment out interactively:
 
 ```
@@ -71,6 +73,15 @@ venv = ProcgenEnv(num_envs=1, env_name="coinrun")
 ```
 
 The environment uses the [`VecEnv`](https://github.com/openai/baselines/blob/master/baselines/common/vec_env/vec_env.py#L29) interface from [`baselines`](https://github.com/openai/baselines), `baselines` is not a dependency of this library.
+
+### Docker
+
+A [`Dockerfile`](Dockerfile) is included to demonstrate a minimal Docker-based setup that works for running random agent.
+
+```
+docker build docker --tag procgen
+docker run --rm -it procgen python3 -m procgen.examples.random_agent
+```
 
 ## Environments
 

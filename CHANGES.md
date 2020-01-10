@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.4
+
+* add random agent script
+* add example Dockerfile
+
 ## 0.9.3
 
 * changed pyglet dependency to `pyglet~=1.4.8`
