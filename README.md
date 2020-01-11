@@ -76,7 +76,7 @@ The environment uses the [`VecEnv`](https://github.com/openai/baselines/blob/mas
 
 ### Docker
 
-A [`Dockerfile`](Dockerfile) is included to demonstrate a minimal Docker-based setup that works for running random agent.
+A [`Dockerfile`](docker/Dockerfile) is included to demonstrate a minimal Docker-based setup that works for running random agent.
 
 ```
 docker build docker --tag procgen
