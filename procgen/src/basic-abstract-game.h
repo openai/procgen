@@ -121,15 +121,15 @@ class BasicAbstractGame : public Game {
     int last_move_action, move_action, special_action;
     float mixrate, maxspeed, max_jump;
 
-    float action_vx;
-    float action_vy;
-    float action_vrot;
+    float action_vx = 0;
+    float action_vy = 0;
+    float action_vrot = 0;
 
     float center_x, center_y;
 
     bool random_agent_start = true;
     bool has_useful_vel_info;
-    int step_rand_int;
+    int step_rand_int = 0;
 
     RandGen asset_rand_gen;
 
