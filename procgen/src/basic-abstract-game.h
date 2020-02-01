@@ -14,7 +14,7 @@ Base game class used by all currently existing games
 
 class BasicAbstractGame : public Game {
   public:
-    int grid_size;
+    int grid_size = 0;
 
     BasicAbstractGame();
     ~BasicAbstractGame();
@@ -112,31 +112,42 @@ class BasicAbstractGame : public Game {
     std::vector<float> asset_aspect_ratios;
     std::vector<int> asset_num_themes;
 
-    bool use_procgen_background;
-    int background_index;
-    float bg_tile_ratio;
-    float bg_pct_x;
+    bool use_procgen_background = false;
+    int background_index = 0;
+    float bg_tile_ratio = 0.0f;
+    float bg_pct_x = 0.0f;
 
-    float char_dim;
-    int last_move_action, move_action, special_action;
-    float mixrate, maxspeed, max_jump;
+    float char_dim = 0.0f;
+    int last_move_action = 0;
+    int move_action = 0;
+    int special_action = 0;
+    float mixrate = 0.0f;
+    float maxspeed = 0.0f;
+    float max_jump = 0.0f;
 
-    float action_vx;
-    float action_vy;
-    float action_vrot;
+    float action_vx = 0.0f;
+    float action_vy = 0.0f;
+    float action_vrot = 0.0f;
 
-    float center_x, center_y;
+    float center_x = 0.0f;
+    float center_y = 0.0f;
 
     bool random_agent_start = true;
-    bool has_useful_vel_info;
-    int step_rand_int;
+    bool has_useful_vel_info = false;
+    int step_rand_int = 0;
 
     RandGen asset_rand_gen;
 
-    int main_width, main_height;
-    int out_of_bounds_object;
+    int main_width = 0;
+    int main_height = 0;
+    int out_of_bounds_object = 0;
 
-    float unit, view_dim, x_off, y_off, visibility, min_visibility;
+    float unit = 0.0f;
+    float view_dim = 0.0f;
+    float x_off = 0.0f;
+    float y_off = 0.0f;
+    float visibility = 0.0f;
+    float min_visibility = 0.0f;
 
   private:
     Grid<int> grid;

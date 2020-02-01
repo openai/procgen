@@ -35,9 +35,9 @@ enum DistributionMode {
 };
 
 struct StepData {
-    float reward;
-    bool done;
-    bool level_complete;
+    float reward = 0.0f;
+    bool done = false;
+    bool level_complete = false;
 };
 
 struct GameOptions {
@@ -61,31 +61,31 @@ class Game {
     bool grid_step = false;
     int level_seed_low = 0;
     int level_seed_high = 1;
-    int game_type;
-    int game_n;
+    int game_type = 0;
+    int game_n = 0;
 
     RandGen level_seed_rand_gen;
     RandGen rand_gen;
 
     StepData step_data;
-    int action;
+    int action = 0;
 
-    int timeout;
+    int timeout = 0;
 
-    int current_level_seed;
-    int episodes_remaining;
-    bool episode_done;
+    int current_level_seed = 0;
+    int episodes_remaining = 0;
+    bool episode_done = false;
 
-    float last_ep_reward;
-    int last_reward_timer;
-    float last_reward;
-    int default_action;
+    float last_ep_reward = 0.0f;
+    int last_reward_timer = 0;
+    float last_reward = 0.0f;
+    int default_action = 0;
 
-    int fixed_asset_seed;
+    int fixed_asset_seed = 0;
 
     uint32_t render_buf[RES_W * RES_H];
 
-    int cur_time;
+    int cur_time = 0;
 
     bool is_waiting_for_step = false;
 
@@ -93,8 +93,8 @@ class Game {
     // these are set by step_async
     std::vector<void *> obs_bufs;
     std::vector<void *> info_bufs;
-    float *reward_ptr;
-    uint8_t *done_ptr;
+    float *reward_ptr = nullptr;
+    uint8_t *done_ptr = nullptr;
 
     Game();
     void step();
@@ -109,6 +109,6 @@ class Game {
     virtual void game_draw(QPainter &p, const QRect &rect) = 0;
 
   private:
-    int reset_count;
-    float total_reward;
+    int reset_count = 0;
+    float total_reward = 0.0f;
 };
