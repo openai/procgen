@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.5
+
+* zero initialize member variables from base classes
+
 ## 0.9.4
 
 * add random agent script
