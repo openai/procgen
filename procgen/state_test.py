@@ -68,11 +68,6 @@ def test_state(env_name):
     run_state_test(env_name)
 
 
-# it's a bit slow to run this test for all environments, so only run it for one by default
-def test_one_game_state():
-    run_state_test("bigfish")
-
-
 def run_state_test(env_name):
     env_kwargs = dict(num=2, env_name=env_name, rand_seed=0)
     env = ProcgenGym3Env(**env_kwargs)

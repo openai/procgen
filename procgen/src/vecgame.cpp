@@ -384,6 +384,8 @@ void VecGame::act() {
         for (int e = 0; e < num_envs; e++) {
             const auto &game = games[e];
             fassert(!game->is_waiting_for_step);
+            // save the action since it's only valid for the duration of this call
+            game->action = *game->action_ptr;
             if (threads.size() == 0) {
                 // special case for no threads
                 game->step();

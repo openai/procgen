@@ -121,7 +121,6 @@ void Game::step() {
     cur_time += 1;
     bool will_force_reset = false;
 
-    action = *action_ptr;
     if (action == -1) {
         action = default_action;
         will_force_reset = true;
