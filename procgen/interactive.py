@@ -27,7 +27,7 @@ def make_interactive(vision, record_dir, **kwargs):
     ob_key = None
     if vision == "human":
         info_key = "rgb"
-        kwargs["render_human"] = True
+        kwargs["render_mode"] = "rgb_array"
     else:
         ob_key = "rgb"
 

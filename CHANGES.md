@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.2
+
+* fix interactive script
+
 ## 0.10.1
 
 * build fixes
