@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.1
+
+* build fixes
+* save action during libenv_act
+
 ## 0.10.0
 
 * add `set_state`, `get_state` methods to save/restore environment state
