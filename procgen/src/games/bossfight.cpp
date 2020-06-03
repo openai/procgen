@@ -3,6 +3,8 @@
 #include <set>
 #include <queue>
 
+const std::string NAME = "bossfight";
+
 const int COMPLETION_BONUS = 10.0f;
 const int POSITIVE_REWARD = 1.0f;
 
@@ -31,14 +33,33 @@ class BossfightGame : public BasicAbstractGame {
   public:
     std::shared_ptr<Entity> boss, shields;
     std::vector<int> attack_modes;
-    int last_fire_time, time_to_swap, invulnerable_duration, vulnerable_duration, num_rounds, round_num, round_health;
-    int boss_vel_timeout, curr_vel_timeout, attack_mode, player_laser_theme, boss_laser_theme, damaged_until_time;
-    bool shields_are_up, barriers_moves_right;
-    float base_fire_prob, boss_bullet_vel, barrier_vel, barrier_spawn_prob;
-    float rand_pct, rand_fire_pct, rand_pct_x, rand_pct_y;
+    int last_fire_time = 0;
+    int time_to_swap = 0;
+    int invulnerable_duration = 0;
+    int vulnerable_duration = 0;
+    int num_rounds = 0;
+    int round_num = 0;
+    int round_health = 0;
+    int boss_vel_timeout = 0;
+    int curr_vel_timeout = 0;
+    int attack_mode = 0;
+    int player_laser_theme = 0;
+    int boss_laser_theme = 0;
+    int damaged_until_time = 0;
+    
+    bool shields_are_up = false;
+    bool barriers_moves_right = false;
+    float base_fire_prob = 0.0f;
+    float boss_bullet_vel = 0.0f;
+    float barrier_vel = 0.0f;
+    float barrier_spawn_prob = 0.0f;
+    float rand_pct = 0.0f;
+    float rand_fire_pct = 0.0f;
+    float rand_pct_x = 0.0f;
+    float rand_pct_y = 0.0f;
 
     BossfightGame()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         timeout = 4000;
 
         main_width = 20;
@@ -52,36 +73,36 @@ class BossfightGame : public BasicAbstractGame {
         main_bg_images_ptr = &space_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == PLAYER) {
-            names.push_back(QString("misc_assets/playerShip1_blue.png"));
-            names.push_back(QString("misc_assets/playerShip1_green.png"));
-            names.push_back(QString("misc_assets/playerShip2_orange.png"));
-            names.push_back(QString("misc_assets/playerShip3_red.png"));
+            names.push_back("misc_assets/playerShip1_blue.png");
+            names.push_back("misc_assets/playerShip1_green.png");
+            names.push_back("misc_assets/playerShip2_orange.png");
+            names.push_back("misc_assets/playerShip3_red.png");
         } else if (type == BOSS) {
-            names.push_back(QString("misc_assets/enemyShipBlack1.png"));
-            names.push_back(QString("misc_assets/enemyShipBlue2.png"));
-            names.push_back(QString("misc_assets/enemyShipGreen3.png"));
-            names.push_back(QString("misc_assets/enemyShipRed4.png"));
+            names.push_back("misc_assets/enemyShipBlack1.png");
+            names.push_back("misc_assets/enemyShipBlue2.png");
+            names.push_back("misc_assets/enemyShipGreen3.png");
+            names.push_back("misc_assets/enemyShipRed4.png");
         } else if (type == ENEMY_BULLET) {
-            names.push_back(QString("misc_assets/laserGreen14.png"));
-            names.push_back(QString("misc_assets/laserRed11.png"));
-            names.push_back(QString("misc_assets/laserBlue09.png"));
+            names.push_back("misc_assets/laserGreen14.png");
+            names.push_back("misc_assets/laserRed11.png");
+            names.push_back("misc_assets/laserBlue09.png");
         } else if (type == PLAYER_BULLET) {
-            names.push_back(QString("misc_assets/laserGreen14.png"));
-            names.push_back(QString("misc_assets/laserRed11.png"));
-            names.push_back(QString("misc_assets/laserBlue09.png"));
+            names.push_back("misc_assets/laserGreen14.png");
+            names.push_back("misc_assets/laserRed11.png");
+            names.push_back("misc_assets/laserBlue09.png");
         } else if (type == SHIELDS) {
             names.push_back("misc_assets/shield2.png");
         } else if (type == BARRIER) {
-            names.push_back("misc_assets/spaceMeteors_001");
-            names.push_back("misc_assets/spaceMeteors_002");
-            names.push_back("misc_assets/spaceMeteors_003");
-            names.push_back("misc_assets/spaceMeteors_004");
-            names.push_back("misc_assets/meteorGrey_big1");
-            names.push_back("misc_assets/meteorGrey_big2");
-            names.push_back("misc_assets/meteorGrey_big3");
-            names.push_back("misc_assets/meteorGrey_big4");
+            names.push_back("misc_assets/spaceMeteors_001.png");
+            names.push_back("misc_assets/spaceMeteors_002.png");
+            names.push_back("misc_assets/spaceMeteors_003.png");
+            names.push_back("misc_assets/spaceMeteors_004.png");
+            names.push_back("misc_assets/meteorGrey_big1.png");
+            names.push_back("misc_assets/meteorGrey_big2.png");
+            names.push_back("misc_assets/meteorGrey_big3.png");
+            names.push_back("misc_assets/meteorGrey_big4.png");
         }
     }
 
@@ -390,6 +411,70 @@ class BossfightGame : public BasicAbstractGame {
             }
         }
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_vector_int(attack_modes);
+        b->write_int(last_fire_time);
+        b->write_int(time_to_swap);
+        b->write_int(invulnerable_duration);
+        b->write_int(vulnerable_duration);
+        b->write_int(num_rounds);
+        b->write_int(round_num);
+        b->write_int(round_health);
+        b->write_int(boss_vel_timeout);
+        b->write_int(curr_vel_timeout);
+        b->write_int(attack_mode);
+        b->write_int(player_laser_theme);
+        b->write_int(boss_laser_theme);
+        b->write_int(damaged_until_time);
+        b->write_bool(shields_are_up);
+        b->write_bool(barriers_moves_right);
+        b->write_float(base_fire_prob);
+        b->write_float(boss_bullet_vel);
+        b->write_float(barrier_vel);
+        b->write_float(barrier_spawn_prob);
+        b->write_float(rand_pct);
+        b->write_float(rand_fire_pct);
+        b->write_float(rand_pct_x);
+        b->write_float(rand_pct_y);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        attack_modes = b->read_vector_int();
+        last_fire_time = b->read_int();
+        time_to_swap = b->read_int();
+        invulnerable_duration = b->read_int();
+        vulnerable_duration = b->read_int();
+        num_rounds = b->read_int();
+        round_num = b->read_int();
+        round_health = b->read_int();
+        boss_vel_timeout = b->read_int();
+        curr_vel_timeout = b->read_int();
+        attack_mode = b->read_int();
+        player_laser_theme = b->read_int();
+        boss_laser_theme = b->read_int();
+        damaged_until_time = b->read_int();
+        shields_are_up = b->read_bool();
+        barriers_moves_right = b->read_bool();
+        base_fire_prob = b->read_float();
+        boss_bullet_vel = b->read_float();
+        barrier_vel = b->read_float();
+        barrier_spawn_prob = b->read_float();
+        rand_pct = b->read_float();
+        rand_fire_pct = b->read_float();
+        rand_pct_x = b->read_float();
+        rand_pct_y = b->read_float();
+
+        int boss_idx = find_entity_index(BOSS);
+        fassert(boss_idx >= 0);
+        boss = entities[boss_idx];
+
+        int shields_idx = find_entity_index(SHIELDS);
+        fassert(shields_idx >= 0);
+        shields = entities[shields_idx];
+    }
 };
 
-REGISTER_GAME("bossfight", BossfightGame);
+REGISTER_GAME(NAME, BossfightGame);

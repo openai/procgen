@@ -5,6 +5,8 @@
 #include "../mazegen.h"
 #include "../cpp-utils.h"
 
+const std::string NAME = "heist";
+
 const float COMPLETION_BONUS = 10.0f;
 
 const int LOCKED_DOOR = 1;
@@ -15,11 +17,12 @@ const int KEY_ON_RING = 11;
 class HeistGame : public BasicAbstractGame {
   public:
     std::shared_ptr<MazeGen> maze_gen;
-    int world_dim, num_keys;
+    int world_dim = 0;
+    int num_keys = 0;
     std::vector<bool> has_keys;
 
     HeistGame()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         maze_gen = nullptr;
         has_useful_vel_info = false;
 
@@ -34,14 +37,18 @@ class HeistGame : public BasicAbstractGame {
         main_bg_images_ptr = &topdown_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    bool should_preserve_type_themes(int type) override {
+        return type == KEY || type == LOCKED_DOOR;
+    }
+
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == WALL_OBJ) {
             names.push_back("kenney/Ground/Dirt/dirtCenter.png");
         } else if (type == EXIT) {
             names.push_back("misc_assets/gemYellow.png");
         } else if (type == PLAYER) {
             names.push_back("misc_assets/spaceAstronauts_008.png");
-        } else if (type == KEY || type == KEY_ON_RING) {
+        } else if (type == KEY) {
             names.push_back("misc_assets/keyBlue.png");
             names.push_back("misc_assets/keyGreen.png");
             names.push_back("misc_assets/keyRed.png");
@@ -187,6 +194,7 @@ class HeistGame : public BasicAbstractGame {
         for (int i = 0; i < num_keys; i++) {
             auto ent = add_entity(1 - ring_key_r * (2 * i + 1.25), ring_key_r * .75, 0, 0, ring_key_r, KEY_ON_RING);
             ent->image_theme = i;
+            ent->image_type = KEY;
             ent->rotation = PI / 2;
             ent->render_z = 1;
             ent->use_abs_coords = true;
@@ -199,6 +207,20 @@ class HeistGame : public BasicAbstractGame {
 
         agent->face_direction(action_vx, action_vy);
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_int(num_keys);
+        b->write_int(world_dim);
+        b->write_vector_bool(has_keys);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        num_keys = b->read_int();
+        world_dim = b->read_int();
+        has_keys = b->read_vector_bool();
+    }
 };
 
-REGISTER_GAME("heist", HeistGame);
+REGISTER_GAME(NAME, HeistGame);

@@ -36,9 +36,6 @@ if (APPLE OR UNIX)
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer")
 endif()
 
-# find libenv.h header
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 # include qt5
 find_package(Qt5 COMPONENTS Gui REQUIRED)
 
@@ -74,5 +71,8 @@ add_library(env
   src/vecgame.cpp
   src/vecoptions.cpp
 )
+
+# find libenv.h header
+target_include_directories(env PUBLIC ${LIBENV_DIR})
 
 target_link_libraries(env Qt5::Gui)

@@ -6,6 +6,8 @@
 #include <queue>
 #include <memory>
 
+const std::string NAME = "jumper";
+
 const float GOAL_REWARD = 10.0f;
 
 const int GOAL = 1;
@@ -27,14 +29,17 @@ const int NUM_WALL_THEMES = 4;
 class Jumper : public BasicAbstractGame {
   public:
     std::shared_ptr<Entity> goal;
-    int jump_count, jump_delta, jump_time;
-    bool has_support, facing_right;
-    int wall_theme;
-    float compass_dim;
+    int jump_count = 0;
+    int jump_delta = 0;
+    int jump_time = 0;
+    bool has_support = false;
+    bool facing_right = false;
+    int wall_theme = 0;
+    float compass_dim = 0.0f;
     std::unique_ptr<RoomGenerator> room_manager;
 
     Jumper()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         room_manager = std::make_unique<RoomGenerator>(this);
     }
 
@@ -42,7 +47,7 @@ class Jumper : public BasicAbstractGame {
         main_bg_images_ptr = &platform_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == PLAYER) {
             names.push_back("misc_assets/bunny2_ready.png");
         } else if (type == SPIKE) {
@@ -435,6 +440,32 @@ class Jumper : public BasicAbstractGame {
             agent->vy -= 0.15f;
         }
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_int(jump_count);
+        b->write_int(jump_delta);
+        b->write_int(jump_time);
+        b->write_bool(has_support);
+        b->write_bool(facing_right);
+        b->write_int(wall_theme);
+        b->write_float(compass_dim);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        jump_count = b->read_int();
+        jump_delta = b->read_int();
+        jump_time = b->read_int();
+        has_support = b->read_bool();
+        facing_right = b->read_bool();
+        wall_theme = b->read_int();
+        compass_dim = b->read_float();
+
+        int goal_idx = find_entity_index(GOAL);
+        fassert(goal_idx >= 0);
+        goal = entities[goal_idx];
+    }
 };
 
-REGISTER_GAME("jumper", Jumper);
+REGISTER_GAME(NAME, Jumper);

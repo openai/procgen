@@ -1,6 +1,7 @@
 #include "randgen.h"
 #include "cpp-utils.h"
 #include <set>
+#include <sstream>
 
 int RandGen::randint(int low, int high) {
     fassert(is_seeded);
@@ -94,4 +95,20 @@ int RandGen::randint() {
 void RandGen::seed(int seed) {
     stdgen.seed(seed);
     is_seeded = true;
+}
+
+void RandGen::serialize(WriteBuffer *b) {
+    b->write_int(is_seeded);
+    std::ostringstream ostream;
+    ostream << stdgen;
+    auto str = ostream.str();
+    b->write_string(str);
+}
+
+void RandGen::deserialize(ReadBuffer *b) {
+    is_seeded = b->read_int();
+    auto str = b->read_string();
+    std::istringstream istream;
+    istream.str(str);
+    istream >> stdgen;
 }

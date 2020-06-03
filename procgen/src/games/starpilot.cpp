@@ -1,6 +1,8 @@
 #include "../basic-abstract-game.h"
 #include "../assetgen.h"
 
+const std::string NAME = "starpilot";
+
 const float V_SCALE = 2.0f / 5.0f;
 
 const float BG_RATIO = 18;
@@ -24,29 +26,29 @@ const int NUM_BASIC_OBJECTS = 9;
 const int NUM_SHIP_THEMES = 7;
 
 bool spawn_cmp(const std::shared_ptr<Entity> &x, const std::shared_ptr<Entity> &y) {
-    return (x->spawn_time < y->spawn_time);
+    return (x->spawn_time > y->spawn_time);
 }
 
 class StarPilotGame : public BasicAbstractGame {
   public:
     std::vector<std::shared_ptr<Entity>> spawners;
-    int spawn_idx;
 
-    float hp_vs[NUM_BASIC_OBJECTS];
-    float hp_healths[NUM_BASIC_OBJECTS];
-    float hp_bullet_r[NUM_BASIC_OBJECTS];
-    float hp_object_r[NUM_BASIC_OBJECTS];
-    float hp_object_prob_weight[NUM_BASIC_OBJECTS];
-    float total_prob_weight;
-    float hp_slow_v;
-    float hp_weapon_bullet_dist;
-    float hp_spawn_right_threshold;
+    float hp_vs[NUM_BASIC_OBJECTS] = {};
+    float hp_healths[NUM_BASIC_OBJECTS] = {};
+    float hp_bullet_r[NUM_BASIC_OBJECTS] = {};
+    float hp_object_r[NUM_BASIC_OBJECTS] = {};
+    float hp_object_prob_weight[NUM_BASIC_OBJECTS] = {};
+    float total_prob_weight = 0.0f;
+    float hp_slow_v = 0.0f;
+    float hp_weapon_bullet_dist = 0.0f;
+    float hp_spawn_right_threshold = 0.0f;
 
-    int hp_min_enemy_delta_t, hp_max_group_size;
-    int hp_max_enemy_delta_t;
+    int hp_min_enemy_delta_t = 0;
+    int hp_max_group_size = 0;
+    int hp_max_enemy_delta_t = 0;
 
     StarPilotGame()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         main_width = 16;
         main_height = 16;
     }
@@ -55,7 +57,7 @@ class StarPilotGame : public BasicAbstractGame {
         main_bg_images_ptr = &space_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == PLAYER) {
             names.push_back("misc_assets/playerShip2_blue.png");
         } else if (type == BULLET_PLAYER) {
@@ -65,40 +67,40 @@ class StarPilotGame : public BasicAbstractGame {
         } else if (type == BULLET3) {
             names.push_back("misc_assets/towerDefense_tile297.png");
         } else if (type == FLYER || type == FAST_FLYER) {
-            names.push_back("misc_assets/spaceShips_001");
-            names.push_back("misc_assets/spaceShips_002");
-            names.push_back("misc_assets/spaceShips_003");
-            names.push_back("misc_assets/spaceShips_004");
-            names.push_back("misc_assets/spaceShips_005");
-            names.push_back("misc_assets/spaceShips_006");
-            names.push_back("misc_assets/spaceShips_007");
+            names.push_back("misc_assets/spaceShips_001.png");
+            names.push_back("misc_assets/spaceShips_002.png");
+            names.push_back("misc_assets/spaceShips_003.png");
+            names.push_back("misc_assets/spaceShips_004.png");
+            names.push_back("misc_assets/spaceShips_005.png");
+            names.push_back("misc_assets/spaceShips_006.png");
+            names.push_back("misc_assets/spaceShips_007.png");
         } else if (type == METEOR) {
-            names.push_back("misc_assets/spaceMeteors_001");
-            names.push_back("misc_assets/spaceMeteors_002");
-            names.push_back("misc_assets/spaceMeteors_003");
-            names.push_back("misc_assets/spaceMeteors_004");
-            names.push_back("misc_assets/meteorGrey_big1");
-            names.push_back("misc_assets/meteorGrey_big2");
-            names.push_back("misc_assets/meteorGrey_big3");
-            names.push_back("misc_assets/meteorGrey_big4");
+            names.push_back("misc_assets/spaceMeteors_001.png");
+            names.push_back("misc_assets/spaceMeteors_002.png");
+            names.push_back("misc_assets/spaceMeteors_003.png");
+            names.push_back("misc_assets/spaceMeteors_004.png");
+            names.push_back("misc_assets/meteorGrey_big1.png");
+            names.push_back("misc_assets/meteorGrey_big2.png");
+            names.push_back("misc_assets/meteorGrey_big3.png");
+            names.push_back("misc_assets/meteorGrey_big4.png");
         } else if (type == CLOUD) {
-            names.push_back("misc_assets/spaceEffect1");
-            names.push_back("misc_assets/spaceEffect2");
-            names.push_back("misc_assets/spaceEffect3");
-            names.push_back("misc_assets/spaceEffect4");
-            names.push_back("misc_assets/spaceEffect5");
-            names.push_back("misc_assets/spaceEffect6");
-            names.push_back("misc_assets/spaceEffect7");
-            names.push_back("misc_assets/spaceEffect8");
-            names.push_back("misc_assets/spaceEffect9");
+            names.push_back("misc_assets/spaceEffect1.png");
+            names.push_back("misc_assets/spaceEffect2.png");
+            names.push_back("misc_assets/spaceEffect3.png");
+            names.push_back("misc_assets/spaceEffect4.png");
+            names.push_back("misc_assets/spaceEffect5.png");
+            names.push_back("misc_assets/spaceEffect6.png");
+            names.push_back("misc_assets/spaceEffect7.png");
+            names.push_back("misc_assets/spaceEffect8.png");
+            names.push_back("misc_assets/spaceEffect9.png");
         } else if (type == TURRET) {
-            names.push_back("misc_assets/spaceStation_018");
-            names.push_back("misc_assets/spaceStation_019");
+            names.push_back("misc_assets/spaceStation_018.png");
+            names.push_back("misc_assets/spaceStation_019.png");
         } else if (type == FINISH_LINE) {
-            names.push_back("misc_assets/spaceRockets_001");
-            names.push_back("misc_assets/spaceRockets_002");
-            names.push_back("misc_assets/spaceRockets_003");
-            names.push_back("misc_assets/spaceRockets_004");
+            names.push_back("misc_assets/spaceRockets_001.png");
+            names.push_back("misc_assets/spaceRockets_002.png");
+            names.push_back("misc_assets/spaceRockets_003.png");
+            names.push_back("misc_assets/spaceRockets_004.png");
         }
     }
 
@@ -109,12 +111,14 @@ class StarPilotGame : public BasicAbstractGame {
 
         p.fillRect(rect, bg_color);
 
-        float bg_k = 3;
-        float t = cur_time;
-        float x_off = -t * scale * hp_slow_v * 2 / char_dim;
+        if (options.use_backgrounds) {
+            float bg_k = 3;
+            float t = cur_time;
+            float x_off = -t * scale * hp_slow_v * 2 / char_dim;
 
-        QRectF r_bg = QRectF(x_off, -rect.height() * (bg_k - 1) / 2, rect.height() * bg_k * BG_RATIO, rect.height() * bg_k);
-        tile_image(p, main_bg_images_ptr->at(background_index).get(), r_bg, 1);
+            QRectF r_bg = QRectF(x_off, -rect.height() * (bg_k - 1) / 2, rect.height() * bg_k * BG_RATIO, rect.height() * bg_k);
+            tile_image(p, main_bg_images_ptr->at(background_index).get(), r_bg, 1);
+        }
 
         draw_foreground(p, rect);
     }
@@ -142,103 +146,71 @@ class StarPilotGame : public BasicAbstractGame {
 
     void init_hps() {
         float scale = 1;
-        bool fix_hyperparams = true;
 
-        if (fix_hyperparams) {
-            for (int i = 0; i < NUM_BASIC_OBJECTS; i++) {
-                hp_vs[i] = 1;
-                hp_healths[i] = 0;
-                hp_object_prob_weight[i] = 1;
-                hp_object_r[i] = scale / 2;
-            }
-
-            float default_bullet_r = scale / 2.5;
-
-            if (options.distribution_mode == EasyMode) {
-                hp_object_prob_weight[METEOR] = 0;
-                hp_object_prob_weight[CLOUD] = 0;
-                hp_object_prob_weight[TURRET] = 0;
-                hp_object_prob_weight[FAST_FLYER] = 0;
-                hp_vs[FLYER] = .75;
-                hp_vs[BULLET2] = 1.25;
-                hp_healths[TURRET] = 5;
-                hp_healths[FLYER] = 2;
-                hp_healths[FAST_FLYER] = 1;
-                maxspeed = 0.75;
-            } else if (options.distribution_mode == HardMode) {
-                hp_vs[BULLET2] = 2;
-
-                hp_healths[TURRET] = 5;
-                hp_healths[FLYER] = 2;
-                hp_healths[FAST_FLYER] = 1;
-                maxspeed = 0.75;
-            } else if (options.distribution_mode == ExtremeMode) {
-                hp_vs[BULLET2] = 2;
-                hp_healths[TURRET] = 10;
-                hp_healths[FLYER] = 5;
-                hp_healths[FAST_FLYER] = 2;
-                maxspeed = 0.5;
-                default_bullet_r = scale / 5;
-            } else {
-                fassert(false);
-            }
-
-            for (int i = 0; i < NUM_BASIC_OBJECTS; i++) {
-                hp_bullet_r[i] = default_bullet_r;
-            }
-
-            hp_healths[METEOR] = 500;
-
-            hp_vs[FAST_FLYER] = 1.5;
-
-            hp_vs[BULLET_PLAYER] = 2;
-
-            hp_vs[BULLET3] = 2;
-            hp_object_r[TURRET] = scale * 2;
-            hp_object_r[METEOR] = scale * 2;
-            hp_object_r[CLOUD] = scale * 2;
-
-            hp_object_prob_weight[FLYER] = 3;
-
-            hp_slow_v = .5;
-            hp_max_group_size = 5;
-
-            hp_weapon_bullet_dist = 3;
-
-            hp_min_enemy_delta_t = 10;
-            hp_max_enemy_delta_t = hp_min_enemy_delta_t + 20;
-
-            hp_spawn_right_threshold = 0.9f;
-        } else {
-            for (size_t i = 0; i < NUM_BASIC_OBJECTS; i++) {
-                hp_vs[i] = rand_gen.rand01() * 1.5 + .35;
-                hp_healths[i] = rand_gen.randint(0, 10) + 1;
-                hp_bullet_r[i] = scale / 5 * (rand_gen.rand01() * .75 + 1) * 1.25;
-                hp_object_r[i] = scale / 2 * (rand_gen.rand01() * .75 + 1);
-                hp_object_prob_weight[i] = rand_gen.rand01();
-            }
-
-            hp_bullet_r[TURRET] *= 2;
-            hp_vs[BULLET_PLAYER] = 1.5 + rand_gen.rand01();
-            hp_vs[BULLET2] = .5 + rand_gen.rand01() * 2;
-            hp_vs[BULLET3] = .5 + rand_gen.rand01() * 2;
-            hp_object_r[TURRET] *= 2 + rand_gen.rand01() * 2;
-            hp_object_r[METEOR] *= 2 + rand_gen.rand01() * 2;
-            hp_object_r[CLOUD] *= 2 + rand_gen.rand01() * 2;
-
-            hp_object_prob_weight[FLYER] *= 1 + rand_gen.rand01() * 3;
-            hp_object_prob_weight[TURRET] *= 1 + rand_gen.rand01();
-
-            hp_slow_v = .25 + rand_gen.rand01() * .5;
-            hp_max_group_size = rand_gen.randint(0, 7) + 1;
-
-            hp_weapon_bullet_dist = 2 + rand_gen.rand01() * 5;
-
-            hp_min_enemy_delta_t = 5 + rand_gen.randint(0, 15);
-            hp_max_enemy_delta_t = hp_min_enemy_delta_t + 15 + rand_gen.randint(0, 30);
-
-            hp_spawn_right_threshold = .75 + .25 * rand_gen.rand01();
+        for (int i = 0; i < NUM_BASIC_OBJECTS; i++) {
+            hp_vs[i] = 1;
+            hp_healths[i] = 0;
+            hp_object_prob_weight[i] = 1;
+            hp_object_r[i] = scale / 2;
         }
+
+        float default_bullet_r = scale / 2.5;
+
+        if (options.distribution_mode == EasyMode) {
+            hp_object_prob_weight[METEOR] = 0;
+            hp_object_prob_weight[CLOUD] = 0;
+            hp_object_prob_weight[TURRET] = 0;
+            hp_object_prob_weight[FAST_FLYER] = 0;
+            hp_vs[FLYER] = .75;
+            hp_vs[BULLET2] = 1.25;
+            hp_healths[TURRET] = 5;
+            hp_healths[FLYER] = 2;
+            hp_healths[FAST_FLYER] = 1;
+            maxspeed = 0.75;
+        } else if (options.distribution_mode == HardMode) {
+            hp_vs[BULLET2] = 2;
+
+            hp_healths[TURRET] = 5;
+            hp_healths[FLYER] = 2;
+            hp_healths[FAST_FLYER] = 1;
+            maxspeed = 0.75;
+        } else if (options.distribution_mode == ExtremeMode) {
+            hp_vs[BULLET2] = 2;
+            hp_healths[TURRET] = 10;
+            hp_healths[FLYER] = 5;
+            hp_healths[FAST_FLYER] = 2;
+            maxspeed = 0.5;
+            default_bullet_r = scale / 5;
+        } else {
+            fassert(false);
+        }
+
+        for (int i = 0; i < NUM_BASIC_OBJECTS; i++) {
+            hp_bullet_r[i] = default_bullet_r;
+        }
+
+        hp_healths[METEOR] = 500;
+
+        hp_vs[FAST_FLYER] = 1.5;
+
+        hp_vs[BULLET_PLAYER] = 2;
+
+        hp_vs[BULLET3] = 2;
+        hp_object_r[TURRET] = scale * 2;
+        hp_object_r[METEOR] = scale * 2;
+        hp_object_r[CLOUD] = scale * 2;
+
+        hp_object_prob_weight[FLYER] = 3;
+
+        hp_slow_v = .5;
+        hp_max_group_size = 5;
+
+        hp_weapon_bullet_dist = 3;
+
+        hp_min_enemy_delta_t = 10;
+        hp_max_enemy_delta_t = hp_min_enemy_delta_t + 20;
+
+        hp_spawn_right_threshold = 0.9f;
 
         hp_object_prob_weight[BULLET_PLAYER] = 0;
         hp_object_prob_weight[BULLET2] = 0;
@@ -366,7 +338,6 @@ class StarPilotGame : public BasicAbstractGame {
         add_spawners();
 
         std::sort(spawners.begin(), spawners.end(), spawn_cmp);
-        spawn_idx = 0;
 
         agent->rotation = PI / 2;
         choose_random_theme(agent);
@@ -427,9 +398,9 @@ class StarPilotGame : public BasicAbstractGame {
             }
         }
 
-        while (spawn_idx < int(spawners.size()) && cur_time == spawners[spawn_idx]->spawn_time) {
-            entities.push_back(spawners[spawn_idx]);
-            spawn_idx += 1;
+        while (spawners.size() > 0 && cur_time == spawners[int(spawners.size()) - 1]->spawn_time) {
+            entities.push_back(spawners[int(spawners.size()) - 1]);
+            spawners.pop_back();
         }
 
         float bullet_r = hp_bullet_r[PLAYER];
@@ -457,6 +428,18 @@ class StarPilotGame : public BasicAbstractGame {
             entities.push_back(finish);
         }
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        write_entities(b, spawners);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        read_entities(b, spawners);
+
+        init_hps();
+    }
 };
 
-REGISTER_GAME("starpilot", StarPilotGame);
+REGISTER_GAME(NAME, StarPilotGame);

@@ -76,20 +76,15 @@ setup(
     packages=find_packages(),
     version=version,
     install_requires=[
-        "numpy~=1.17",
-        "gym~=0.15",
-        "filelock~=3.0",
-        "cffi~=1.12",
-        # optional, used for interactive mode
-        "pyglet~=1.4.8",
-        "imageio~=2.6",
-        "imageio-ffmpeg~=0.3",
+        "numpy>=1.17.0,<2.0.0",
+        "gym>=0.15.0,<1.0.0",
+        "gym3>=0.1.0,<1.0.0",
+        "filelock>=3.0.0,<4.0.0",
     ],
     python_requires=">=3.6.0",
     package_data={
         "procgen": [
             "version.txt",
-            "libenv.h",
             *asset_relpaths,
         ]
     },

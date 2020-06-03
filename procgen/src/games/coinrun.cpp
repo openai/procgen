@@ -6,6 +6,8 @@
 #include "../cpp-utils.h"
 #include "../qt-utils.h"
 
+const std::string NAME = "coinrun";
+
 const float GOAL_REWARD = 10.0f;
 
 const int GOAL = 1;
@@ -27,22 +29,25 @@ const int ENEMY_BARRIER = 19;
 
 const int CRATE = 20;
 
-std::vector<const char *> WALKING_ENEMIES = {"slimeBlock", "slimePurple", "slimeBlue", "slimeGreen", "mouse", "snail", "ladybug", "wormGreen", "wormPink"};
-std::vector<const char *> PLAYER_THEME_COLORS = {"Beige", "Blue", "Green", "Pink", "Yellow"};
-std::vector<const char *> GROUND_THEMES = {"Dirt", "Grass", "Planet", "Sand", "Snow", "Stone"};
+std::vector<std::string> WALKING_ENEMIES = {"slimeBlock", "slimePurple", "slimeBlue", "slimeGreen", "mouse", "snail", "ladybug", "wormGreen", "wormPink"};
+std::vector<std::string> PLAYER_THEME_COLORS = {"Beige", "Blue", "Green", "Pink", "Yellow"};
+std::vector<std::string> GROUND_THEMES = {"Dirt", "Grass", "Planet", "Sand", "Snow", "Stone"};
 
 const int NUM_GROUND_THEMES = (int)(GROUND_THEMES.size());
 
 class CoinRun : public BasicAbstractGame {
   public:
     std::shared_ptr<Entity> goal;
-    float last_agent_y;
-    int wall_theme;
-    bool has_support, facing_right, is_on_crate;
-    float gravity, air_control;
+    float last_agent_y = 0.0f;
+    int wall_theme = 0;
+    bool has_support = false;
+    bool facing_right = false;
+    bool is_on_crate = false;
+    float gravity = 0.0f;
+    float air_control = 0.0f;
 
     CoinRun()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         visibility = 13;
         mixrate = 0.2f;
 
@@ -64,40 +69,40 @@ class CoinRun : public BasicAbstractGame {
         return BasicAbstractGame::get_adjusted_image_rect(type, rect);
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == PLAYER) {
             for (const auto &color : PLAYER_THEME_COLORS) {
-                names.push_back("kenney/Players/128x256/" + QString(color) + "/alien" + QString(color) + "_stand.png");
+                names.push_back("kenney/Players/128x256/" + color + "/alien" + color + "_stand.png");
             }
         } else if (type == PLAYER_JUMP) {
             for (const auto &color : PLAYER_THEME_COLORS) {
-                names.push_back("kenney/Players/128x256/" + QString(color) + "/alien" + QString(color) + "_jump.png");
+                names.push_back("kenney/Players/128x256/" + color + "/alien" + color + "_jump.png");
             }
         } else if (type == PLAYER_RIGHT1) {
             for (const auto &color : PLAYER_THEME_COLORS) {
-                names.push_back("kenney/Players/128x256/" + QString(color) + "/alien" + QString(color) + "_walk1.png");
+                names.push_back("kenney/Players/128x256/" + color + "/alien" + color + "_walk1.png");
             }
         } else if (type == PLAYER_RIGHT2) {
             for (const auto &color : PLAYER_THEME_COLORS) {
-                names.push_back("kenney/Players/128x256/" + QString(color) + "/alien" + QString(color) + "_walk2.png");
+                names.push_back("kenney/Players/128x256/" + color + "/alien" + color + "_walk2.png");
             }
         } else if (type == ENEMY1) {
             for (const auto &enemy : WALKING_ENEMIES) {
-                names.push_back("kenney/Enemies/" + QString(enemy) + ".png");
+                names.push_back("kenney/Enemies/" + enemy + ".png");
             }
         } else if (type == ENEMY2) {
             for (const auto &enemy : WALKING_ENEMIES) {
-                names.push_back("kenney/Enemies/" + QString(enemy) + "_move.png");
+                names.push_back("kenney/Enemies/" + enemy + "_move.png");
             }
         } else if (type == GOAL) {
             names.push_back("kenney/Items/coinGold.png");
         } else if (type == WALL_TOP) {
             for (const auto &ground : GROUND_THEMES) {
-                names.push_back("kenney/Ground/" + QString(ground) + "/" + QString(ground).toLower() + "Mid.png");
+                names.push_back("kenney/Ground/" + ground + "/" + to_lower(ground) + "Mid.png");
             }
         } else if (type == WALL_MID) {
             for (const auto &ground : GROUND_THEMES) {
-                names.push_back("kenney/Ground/" + QString(ground) + "/" + QString(ground).toLower() + "Center.png");
+                names.push_back("kenney/Ground/" + ground + "/" + to_lower(ground) + "Center.png");
             }
         } else if (type == LAVA_TOP) {
             names.push_back("kenney/Tiles/lavaTop_low.png");
@@ -491,6 +496,28 @@ class CoinRun : public BasicAbstractGame {
 
         last_agent_y = agent->y;
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_float(last_agent_y);
+        b->write_int(wall_theme);
+        b->write_bool(has_support);
+        b->write_bool(facing_right);
+        b->write_bool(is_on_crate);
+        b->write_float(gravity);
+        b->write_float(air_control);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        last_agent_y = b->read_float();
+        wall_theme = b->read_int();
+        has_support = b->read_bool();
+        facing_right = b->read_bool();
+        is_on_crate = b->read_bool();
+        gravity = b->read_float();
+        air_control = b->read_float();
+    }
 };
 
-REGISTER_GAME("coinrun", CoinRun);
+REGISTER_GAME(NAME, CoinRun);

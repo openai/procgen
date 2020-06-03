@@ -4,6 +4,8 @@
 #include <set>
 #include <queue>
 
+const std::string NAME = "caveflyer";
+
 const float GOAL_REWARD = 10.0f;
 const float TARGET_REWARD = 3.0f;
 
@@ -19,11 +21,10 @@ const int MARKER = 1003;
 
 class CaveFlyerGame : public BasicAbstractGame {
   public:
-    int ground_theme;
     std::unique_ptr<RoomGenerator> room_manager;
 
     CaveFlyerGame()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         mixrate = 0.9f;
         room_manager = std::make_unique<RoomGenerator>(this);
     }
@@ -32,7 +33,7 @@ class CaveFlyerGame : public BasicAbstractGame {
         main_bg_images_ptr = &space_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == GOAL) {
             names.push_back("misc_assets/ufoGreen2.png");
         } else if (type == OBSTACLE) {
@@ -323,4 +324,4 @@ class CaveFlyerGame : public BasicAbstractGame {
     }
 };
 
-REGISTER_GAME("caveflyer", CaveFlyerGame);
+REGISTER_GAME(NAME, CaveFlyerGame);

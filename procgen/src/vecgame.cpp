@@ -3,6 +3,8 @@
 #include "vecoptions.h"
 #include "game.h"
 
+const int32_t END_OF_BUFFER = 0xCAFECAFE;
+
 extern void coinrun_old_init(int rand_seed);
 
 static std::once_flag global_init_flag;
@@ -38,81 +40,70 @@ std::vector<std::vector<void *>> convert_bufs(void **bufs, int num_envs,
 }
 
 extern "C" {
-libenv_venv *libenv_make(int num_envs, const struct libenv_options options) {
-    auto venv = new VecGame(num_envs, VecOptions(options));
-    return (libenv_venv *)(venv);
+int libenv_version() {
+    return LIBENV_VERSION;
 }
 
-int libenv_get_spaces(libenv_venv *env, enum libenv_spaces_name name,
-                      struct libenv_space *out_spaces) {
-    auto venv = (VecGame *)(env);
-    std::vector<struct libenv_space> in_spaces;
-    if (name == LIBENV_SPACES_OBSERVATION) {
-        in_spaces = venv->observation_spaces;
-    } else if (name == LIBENV_SPACES_ACTION) {
-        in_spaces = venv->action_spaces;
-        fassert(in_spaces.size() == 1);
-        fassert(in_spaces[0].dtype == LIBENV_DTYPE_INT32);
-    } else if (name == LIBENV_SPACES_RENDER) {
-        in_spaces = venv->render_spaces;
-    } else if (name == LIBENV_SPACES_INFO) {
-        in_spaces = venv->info_spaces;
+libenv_env *libenv_make(int num_envs, const struct libenv_options options) {
+    auto venv = new VecGame(num_envs, VecOptions(options));
+    return (libenv_env *)(venv);
+}
+
+int libenv_get_tensortypes(libenv_env *handle, enum libenv_space_name name, struct libenv_tensortype *out_types) {
+    auto venv = (VecGame *)(handle);
+    std::vector<struct libenv_tensortype> types;
+    if (name == LIBENV_SPACE_OBSERVATION) {
+        types = venv->observation_types;
+    } else if (name == LIBENV_SPACE_ACTION) {
+        types = venv->action_types;
+        fassert(types.size() == 1);
+        fassert(types[0].dtype == LIBENV_DTYPE_INT32);
+    } else if (name == LIBENV_SPACE_INFO) {
+        types = venv->info_types;
     } else {
         return 0;
     }
-    if (out_spaces != nullptr) {
-        for (size_t i = 0; i < in_spaces.size(); i++) {
-            out_spaces[i] = in_spaces[i];
+    if (out_types != nullptr) {
+        for (size_t i = 0; i < types.size(); i++) {
+            out_types[i] = types[i];
         }
     }
-    return (int)(in_spaces.size());
+    return (int)(types.size());
 }
 
-void libenv_reset(libenv_venv *env, struct libenv_step *step) {
-    auto venv = (VecGame *)(env);
-    auto obs = convert_bufs(step->obs, venv->num_envs,
-                            venv->observation_spaces.size());
-    venv->reset(obs);
+void libenv_set_buffers(libenv_env *handle, struct libenv_buffers *bufs) {
+    auto venv = (VecGame *)(handle);
+    auto ac = convert_bufs(bufs->ac, venv->num_envs,
+                           venv->action_types.size());
+    auto ob = convert_bufs(bufs->ob, venv->num_envs,
+                           venv->observation_types.size());
+    auto info =
+        convert_bufs(bufs->info, venv->num_envs, venv->info_types.size());
+    venv->set_buffers(ac, ob, info, bufs->rew, bufs->first);
 }
 
-void libenv_step_async(libenv_venv *env, const void **acts,
-                       struct libenv_step *step) {
-    auto venv = (VecGame *)(env);
-    // we only ever use a single discrete action per env
-    auto vec_acts = std::vector<int32_t>(venv->num_envs);
-    for (size_t env_idx = 0; env_idx < vec_acts.size(); env_idx++) {
-        vec_acts[env_idx] = *(const int32_t *)(acts[env_idx]);
-    }
-    auto obs = convert_bufs(step->obs, venv->num_envs,
-                            venv->observation_spaces.size());
-    auto infos =
-        convert_bufs(step->infos, venv->num_envs, venv->info_spaces.size());
-    venv->step_async(vec_acts, obs, infos, step->rews, step->dones);
+void libenv_observe(libenv_env *handle) {
+    auto venv = (VecGame *)(handle);
+    venv->observe();
 }
 
-void libenv_step_wait(libenv_venv *env) {
-    auto venv = (VecGame *)(env);
-    venv->step_wait();
+void libenv_act(libenv_env *handle) {
+    auto venv = (VecGame *)(handle);
+    venv->act();
 }
 
-bool libenv_render(libenv_venv *env, const char *mode, void **frames) {
-    auto venv = (VecGame *)(env);
-    std::vector<void *> arrays(frames, frames + venv->num_envs);
-    return venv->render(std::string(mode), arrays);
-}
-
-void libenv_close(libenv_venv *env) {
-    auto venv = (VecGame *)(env);
+void libenv_close(libenv_env *handle) {
+    auto venv = (VecGame *)(handle);
     delete venv;
 }
 }
 
 // end libenv api
 
-static void stepping_worker(std::mutex& stepping_thread_mutex, 
-            std::list<std::shared_ptr<Game>>& pending_games,
-            std::condition_variable& pending_games_added,
-            std::condition_variable& pending_game_complete, bool& time_to_die) {
+static void stepping_worker(std::mutex &stepping_thread_mutex,
+                            std::list<std::shared_ptr<Game>> &pending_games,
+                            std::condition_variable &pending_games_added,
+                            std::condition_variable &pending_game_complete, bool &time_to_die) {
     while (1) {
         std::shared_ptr<Game> game;
 
@@ -132,7 +123,15 @@ static void stepping_worker(std::mutex& stepping_thread_mutex,
             }
         }
 
-        game->step();
+        // the first time the threads are activated is before any step, just to initialize
+        // the environment and produce the initial observation
+        if (!game->initial_reset_complete) {
+            game->reset();
+            game->observe();
+            game->initial_reset_complete = true;
+        } else{
+            game->step();
+        }
 
         {
             std::unique_lock<std::mutex> lock(stepping_thread_mutex);
@@ -143,7 +142,7 @@ static void stepping_worker(std::mutex& stepping_thread_mutex,
 }
 
 void global_init(int rand_seed, std::string resource_root) {
-    global_resource_root = resource_root.c_str();
+    global_resource_root = resource_root;
 
     try {
         images_load();
@@ -168,6 +167,7 @@ inline uint32_t hash_str_uint32(const std::string &str) {
 }
 
 VecGame::VecGame(int _nenvs, VecOptions opts) {
+    render_human = false;
     num_envs = _nenvs;
     games.resize(num_envs);
     std::string env_name;
@@ -187,6 +187,7 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
     opts.consume_int("rand_seed", &rand_seed);
     opts.consume_int("num_threads", &num_threads);
     opts.consume_string("resource_root", &resource_root);
+    opts.consume_bool("render_human", &render_human);
 
     std::call_once(global_init_flag, global_init, rand_seed,
                    resource_root);
@@ -208,6 +209,78 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
     fassert(num_levels >= 0);
     fassert(start_level >= 0);
 
+    {
+        struct libenv_tensortype s;
+        strcpy(s.name, "rgb");
+        s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+        s.dtype = LIBENV_DTYPE_UINT8;
+        s.shape[0] = RES_W;
+        s.shape[1] = RES_H;
+        s.shape[2] = 3;
+        s.ndim = 3;
+        s.low.uint8 = 0;
+        s.high.uint8 = 255;
+        observation_types.push_back(s);
+    }
+
+    {
+        struct libenv_tensortype s;
+        strcpy(s.name, "action");
+        s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+        s.dtype = LIBENV_DTYPE_INT32;
+        s.ndim = 0;
+        s.low.int32 = 0;
+        s.high.int32 = num_actions - 1;
+        action_types.push_back(s);
+    }
+
+    {
+        struct libenv_tensortype s;
+        strcpy(s.name, "prev_level_seed");
+        s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+        s.dtype = LIBENV_DTYPE_INT32;
+        s.ndim = 0,
+        s.low.int32 = 0;
+        s.high.int32 = INT32_MAX;
+        info_types.push_back(s);
+    }
+
+    {
+        struct libenv_tensortype s;
+        strcpy(s.name, "prev_level_complete");
+        s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+        s.dtype = LIBENV_DTYPE_UINT8;
+        s.ndim = 0,
+        s.low.uint8 = 0;
+        s.high.uint8 = 1;
+        info_types.push_back(s);
+    }
+
+    {
+        struct libenv_tensortype s;
+        strcpy(s.name, "level_seed");
+        s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+        s.dtype = LIBENV_DTYPE_INT32;
+        s.ndim = 0,
+        s.low.int32 = 0;
+        s.high.int32 = INT32_MAX;
+        info_types.push_back(s);
+    }
+    
+    if (render_human) {
+        struct libenv_tensortype s;
+        strcpy(s.name, "rgb");
+        s.scalar_type = LIBENV_SCALAR_TYPE_DISCRETE;
+        s.dtype = LIBENV_DTYPE_UINT8;
+        s.shape[0] = RENDER_RES;
+        s.shape[1] = RENDER_RES;
+        s.shape[2] = 3;
+        s.ndim = 3,
+        s.low.uint8 = 0;
+        s.high.uint8 = 255;
+        info_types.push_back(s);
+    }
+
     int level_seed_low = 0;
     int level_seed_high = 0;
 
@@ -228,16 +301,23 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
     RandGen game_level_seed_gen;
     game_level_seed_gen.seed(rand_seed);
 
+    std::map<std::string, int> info_name_to_offset;
+    for (size_t i = 0; i < info_types.size(); i++) {
+        info_name_to_offset[info_types[i].name] = i;
+    }
+
     for (int n = 0; n < num_envs; n++) {
         auto name = env_names[n % num_joint_games];
 
         games[n] = globalGameRegistry->at(name)();
+        fassert(games[n]->game_name == name);
         games[n]->level_seed_rand_gen.seed(game_level_seed_gen.randint());
         games[n]->level_seed_high = level_seed_high;
         games[n]->level_seed_low = level_seed_low;
         games[n]->game_n = n;
         games[n]->is_waiting_for_step = false;
         games[n]->parse_options(name, opts);
+        games[n]->info_name_to_offset = info_name_to_offset;
 
         // Auto-selected a fixed_asset_seed if one wasn't specified on
         // construction
@@ -247,105 +327,62 @@ VecGame::VecGame(int _nenvs, VecOptions opts) {
         }
 
         games[n]->game_init();
-        games[n]->reset();
-    }
-
-    {
-        struct libenv_space s;
-        strcpy(s.name, "rgb");
-        s.type = LIBENV_SPACE_TYPE_BOX;
-        s.dtype = LIBENV_DTYPE_UINT8;
-        s.shape[0] = RES_W;
-        s.shape[1] = RES_H;
-        s.shape[2] = 3;
-        s.ndim = 3;
-        s.low.uint8 = 0;
-        s.high.uint8 = 255;
-        observation_spaces.push_back(s);
-    }
-
-    {
-        struct libenv_space s;
-        strcpy(s.name, "action");
-        s.type = LIBENV_SPACE_TYPE_DISCRETE;
-        s.dtype = LIBENV_DTYPE_INT32;
-        s.shape[0] = 1;
-        s.ndim = 1;
-        s.low.int32 = 0;
-        s.high.int32 = num_actions - 1;
-        action_spaces.push_back(s);
-    }
-
-    {
-        struct libenv_space s;
-        strcpy(s.name, "level_seed");
-        s.type = LIBENV_SPACE_TYPE_BOX;
-        s.dtype = LIBENV_DTYPE_INT32;
-        s.shape[0] = 1;
-        s.ndim = 1,
-        s.low.int32 = 0;
-        s.high.int32 = INT32_MAX;
-        info_spaces.push_back(s);
-    }
-
-    {
-        struct libenv_space s;
-        strcpy(s.name, "level_complete");
-        s.type = LIBENV_SPACE_TYPE_DISCRETE;
-        s.dtype = LIBENV_DTYPE_UINT8;
-        s.shape[0] = 1;
-        s.ndim = 1,
-        s.low.int32 = 0;
-        s.high.int32 = 1;
-        info_spaces.push_back(s);
-    }
-
-    {
-        struct libenv_space s;
-        strcpy(s.name, "rgb_array");
-        s.type = LIBENV_SPACE_TYPE_BOX;
-        s.dtype = LIBENV_DTYPE_UINT8;
-        s.shape[0] = RENDER_RES;
-        s.shape[1] = RENDER_RES;
-        s.shape[2] = 3;
-        s.ndim = 3,
-        s.low.uint8 = 0;
-        s.high.uint8 = 255;
-        render_spaces.push_back(s);
     }
 }
 
-void VecGame::reset(const std::vector<std::vector<void *>> &obs) {
-    if (!first_reset) {
-        printf("WARNING: Procgen ignores resets, please create a new environment "
-               "instead\n");
-    }
-    first_reset = false;
-    wait_for_stepping_threads();
-    for (int e = 0; e < num_envs; e++) {
-        const auto &game = games[e];
-        game->render_to_buf(game->render_buf, RES_W, RES_H, false);
-        bgr32_to_rgb888(obs[e][0], game->render_buf, RES_W, RES_H);
-    }
-}
-
-void VecGame::step_async(const std::vector<int32_t> &acts,
-                         const std::vector<std::vector<void *>> &obs,
-                         const std::vector<std::vector<void *>> &infos,
-                         float *rews, uint8_t *dones) {
-    // this function should never be called until after creation/step_wait()
-    // so at this point, we can be certain that no games are waiting for steps
-    // and that all games belong to the python thread
+void VecGame::set_buffers(const std::vector<std::vector<void *>> &ac, const std::vector<std::vector<void *>> &ob, const std::vector<std::vector<void *>> &info, float *rew, uint8_t *first) {
     {
         std::unique_lock<std::mutex> lock(stepping_thread_mutex);
 
         for (int e = 0; e < num_envs; e++) {
             const auto &game = games[e];
-            game->action = acts[e];
-            game->obs_bufs = obs[e];
-            game->info_bufs = infos[e];
-            game->reward_ptr = &rews[e];
-            game->done_ptr = &dones[e];
+            // we only ever have one action
+            game->action_ptr = (int32_t *)(ac[e][0]);
+            game->obs_bufs = ob[e];
+            game->info_bufs = info[e];
+            game->reward_ptr = &rew[e];
+            game->first_ptr = &first[e];
+            
+            // render the initial state so we don't see a black screen on the first frame
+            fassert(!game->is_waiting_for_step);
+            fassert(!game->initial_reset_complete);
+            if (threads.size() == 0) {
+                // special case for no threads
+                game->reset();
+                game->observe();
+                game->initial_reset_complete = true;
+            } else {
+                game->is_waiting_for_step = true;
+                pending_games.push_back(game);
+            }
+        }
+    }
+    pending_games_added.notify_all();
+}
+
+void VecGame::observe() {
+    wait_for_stepping_threads();
+    // at this point all games belong to the python thread
+
+    if (render_human) {
+        uint8_t render_hires_buf[RENDER_RES * RENDER_RES * 4];
+
+        for (int e = 0; e < num_envs; e++) {
+            const auto &game = games[e];
+            game->render_to_buf(render_hires_buf, RENDER_RES, RENDER_RES, true);
+            bgr32_to_rgb888(game->info_bufs[game->info_name_to_offset.at("rgb")], render_hires_buf, RENDER_RES, RENDER_RES);
+        }
+    }
+}
+
+void VecGame::act() {
+    wait_for_stepping_threads();
+
+    {
+        std::unique_lock<std::mutex> lock(stepping_thread_mutex);
+
+        for (int e = 0; e < num_envs; e++) {
+            const auto &game = games[e];
             fassert(!game->is_waiting_for_step);
             if (threads.size() == 0) {
                 // special case for no threads
@@ -395,19 +432,24 @@ void VecGame::wait_for_stepping_threads() {
     }
 }
 
-void VecGame::step_wait() {
-    wait_for_stepping_threads();
-    // at this point all games belong to the python thread
-}
-
-bool VecGame::render(const std::string &mode,
-                     const std::vector<void *> &arrays) {
-    uint8_t render_hires_buf[RENDER_RES * RENDER_RES * 4];
-
-    for (int e = 0; e < num_envs; e++) {
-        const auto &game = games[e];
-        game->render_to_buf(render_hires_buf, RENDER_RES, RENDER_RES, true);
-        bgr32_to_rgb888(arrays[e], render_hires_buf, RENDER_RES, RENDER_RES);
+extern "C" {
+    LIBENV_API int get_state(libenv_env *handle, int env_idx, char *data, int length) {
+        auto venv = (VecGame *)(handle);
+        venv->wait_for_stepping_threads();
+        auto b = WriteBuffer(data, length);
+        venv->games.at(env_idx)->serialize(&b);
+        b.write_int(END_OF_BUFFER);
+        return b.offset;
     }
-    return true;
+
+    LIBENV_API void set_state(libenv_env *handle, int env_idx, char *data, int length) {
+        auto venv = (VecGame *)(handle);
+        venv->wait_for_stepping_threads();
+        auto b = ReadBuffer(data, length);
+        venv->games.at(env_idx)->deserialize(&b);
+        fassert(b.read_int() == END_OF_BUFFER);
+        // after deserializing, we need to update the observation and info buffers so that the
+        // next time VecGame::observe() is called, the correct data will be in the buffers
+        venv->games.at(env_idx)->observe();
+    }
 }

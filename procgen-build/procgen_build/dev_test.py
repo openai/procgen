@@ -19,28 +19,32 @@ def main():
     if platform.system() == "Linux":
         apt_install(["mesa-common-dev"])
 
+    installer_urls = {
+        "Linux": "https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh",
+        "Darwin": "https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-MacOSX-x86_64.sh",
+        "Windows": "https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Windows-x86_64.exe",
+    }
+    installer_url = installer_urls[platform.system()]
+    urlretrieve(
+        installer_url,
+        "miniconda-installer.exe" if platform.system() == "Windows" else "miniconda-installer.sh",
+    )
     if platform.system() == "Windows":
-        # using the installer seems to hang so use chocolatey instead
-        run("choco install miniconda3 --version 4.7.12.1 --no-progress --yes")
-        os.environ["PATH"] = "C:\\tools\\miniconda3;C:\\tools\\miniconda3\\Library\\bin;C:\\tools\\miniconda3\\Scripts;" + os.environ["PATH"]
+        run("miniconda-installer.exe /S /D=c:\\miniconda3")
+        os.environ["PATH"] = "C:\\miniconda3;C:\\miniconda3\\Library\\bin;C:\\miniconda3\\Scripts;" + os.environ["PATH"]
     else:
-        installer_urls = {
-            "Linux": "https://repo.anaconda.com/miniconda/Miniconda2-4.7.12.1-Linux-x86_64.sh",
-            "Darwin": "https://repo.anaconda.com/miniconda/Miniconda2-4.7.12.1-MacOSX-x86_64.sh",
-        }
-        installer_url = installer_urls[platform.system()]
-        urlretrieve(
-            installer_url,
-            "miniconda-installer.sh",
-        )
         conda_path = os.path.join(os.getcwd(), "miniconda")
         run(f"bash miniconda-installer.sh -b -p {conda_path}")
         os.environ["PATH"] = f"/{conda_path}/bin/:" + os.environ["PATH"]
-    run("conda env update --name base --file environment.yml")
-    run("conda init")
-    run("pip install -e .[test]")
-    run("""python -c "from procgen import ProcgenEnv; ProcgenEnv(num_envs=1, env_name='coinrun')" """)
-    run("pytest --verbose --benchmark-disable --durations=16 .")
+
+    def run_in_conda_env(cmd):
+        run(f"conda run --name dev {cmd}", shell=False)
+
+    run("conda env update --name dev --file environment.yml")
+    run_in_conda_env("pip show gym3")
+    run_in_conda_env("pip install -e .[test]")
+    run_in_conda_env("""python -c "from procgen import ProcgenGym3Env; ProcgenGym3Env(num=1, env_name='coinrun')" """)
+    run_in_conda_env("pytest --verbose --benchmark-disable --durations=16 .")
 
 
 if __name__ == "__main__":

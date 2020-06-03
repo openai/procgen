@@ -8,6 +8,7 @@ Simple utility class for managing a grid of objects
 
 #include <vector>
 #include "cpp-utils.h"
+#include "buffer.h"
 
 template <typename T>
 class Grid {
@@ -63,5 +64,17 @@ class Grid {
     void set_index(int index, T v) {
         fassert(index < w * h);
         data[index] = v;
+    };
+
+    void serialize(WriteBuffer *b) {
+        b->write_int(w);
+        b->write_int(h);
+        b->write_vector_int(data);
+    };
+
+    void deserialize(ReadBuffer *b) {
+        w = b->read_int();
+        h = b->read_int();
+        data = b->read_vector_int();
     };
 };

@@ -5,6 +5,8 @@
 #include "../mazegen.h"
 #include "../cpp-utils.h"
 
+const std::string NAME = "chaser";
+
 const float ORB_REWARD = 0.04f;
 const float COMPLETION_BONUS = 10.0f;
 const float ORB_DIM = 0.3f;
@@ -25,11 +27,16 @@ class ChaserGame : public BasicAbstractGame {
     std::shared_ptr<MazeGen> maze_gen;
     std::vector<int> free_cells;
     std::vector<bool> is_space_vec;
-    int eat_timeout, egg_timeout, eat_time, total_enemies, total_orbs, orbs_collected;
-    int maze_dim;
+    int eat_timeout = 0;
+    int egg_timeout = 0;
+    int eat_time = 0;
+    int total_enemies = 0;
+    int total_orbs = 0;
+    int orbs_collected = 0;
+    int maze_dim = 0;
 
     ChaserGame()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         mixrate = 1;
         maxspeed = .5;
 
@@ -44,7 +51,7 @@ class ChaserGame : public BasicAbstractGame {
         main_bg_images_ptr = &topdown_simple_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == PLAYER) {
             names.push_back("misc_assets/enemyFloating_1b.png");
         } else if (type == ENEMY) {
@@ -101,11 +108,11 @@ class ChaserGame : public BasicAbstractGame {
         return BasicAbstractGame::image_for_type(type);
     }
 
-    void draw_grid_obj(QPainter &p, const QRectF &rect, int type) override {
+    void draw_grid_obj(QPainter &p, const QRectF &rect, int type, int theme) override {
         if (type == ORB) {
             p.fillRect(QRectF(rect.x() + rect.width() * (1 - ORB_DIM) / 2, rect.y() + rect.height() * (1 - ORB_DIM) / 2, rect.width() * ORB_DIM, rect.height() * ORB_DIM), QColor(0, 255, 0));
         } else {
-            BasicAbstractGame::draw_grid_obj(p, rect, type);
+            BasicAbstractGame::draw_grid_obj(p, rect, type, theme);
         }
     }
 
@@ -377,6 +384,32 @@ class ChaserGame : public BasicAbstractGame {
             step_data.done = true;
         }
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_vector_int(free_cells);
+        b->write_vector_bool(is_space_vec);
+        b->write_int(eat_timeout);
+        b->write_int(egg_timeout);
+        b->write_int(eat_time);
+        b->write_int(total_enemies);
+        b->write_int(total_orbs);
+        b->write_int(orbs_collected);
+        b->write_int(maze_dim);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        free_cells = b->read_vector_int();
+        is_space_vec = b->read_vector_bool();
+        eat_timeout = b->read_int();
+        egg_timeout = b->read_int();
+        eat_time = b->read_int();
+        total_enemies = b->read_int();
+        total_orbs = b->read_int();
+        orbs_collected = b->read_int();
+        maze_dim = b->read_int();
+    }
 };
 
-REGISTER_GAME("chaser", ChaserGame);
+REGISTER_GAME(NAME, ChaserGame);

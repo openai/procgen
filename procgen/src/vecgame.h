@@ -19,24 +19,24 @@ class Game;
 
 class VecGame {
   public:
-    std::vector<struct libenv_space> observation_spaces;
-    std::vector<struct libenv_space> action_spaces;
-    std::vector<struct libenv_space> render_spaces;
-    std::vector<struct libenv_space> info_spaces;
+    std::vector<struct libenv_tensortype> observation_types;
+    std::vector<struct libenv_tensortype> action_types;
+    std::vector<struct libenv_tensortype> info_types;
 
     int num_envs;
     int num_joint_games;
     int num_actions;
+    bool render_human;
 
     std::vector<std::shared_ptr<Game>> games;
 
     VecGame(int _nenvs, VecOptions opt_vec);
     ~VecGame();
 
-    void reset(const std::vector<std::vector<void *>> &obs);
-    void step_async(const std::vector<int32_t> &acts, const std::vector<std::vector<void *>> &obs, const std::vector<std::vector<void *>> &infos, float *rews, uint8_t *dones);
-    void step_wait();
-    bool render(const std::string &mode, const std::vector<void *> &arrays);
+    void set_buffers(const std::vector<std::vector<void *>> &ac, const std::vector<std::vector<void *>> &ob, const std::vector<std::vector<void *>> &info, float *rew, uint8_t *first);
+    void observe();
+    void act();
+    void wait_for_stepping_threads();
 
   private:
     // this mutex synchronizes access to pending_games and game->is_waiting_for_step
@@ -49,6 +49,4 @@ class VecGame {
     std::condition_variable pending_game_complete;
     std::vector<std::thread> threads;
     bool time_to_die = false;
-    bool first_reset = true;
-    void wait_for_stepping_threads();
 };

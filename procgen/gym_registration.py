@@ -1,24 +1,17 @@
 from gym.envs.registration import register
-from gym import ObservationWrapper
-from .env import ENV_NAMES, ProcgenEnv
-from .scalarize import Scalarize
+from gym3 import ToGymEnv, ViewerWrapper, ExtractDictObWrapper
+from .env import ENV_NAMES, ProcgenGym3Env
 
 
-class RemoveDictObs(ObservationWrapper):
-    def __init__(self, env, key):
-        self.key = key
-        super().__init__(env=env)
-        self.observation_space = env.observation_space.spaces[self.key]
-
-    def observation(self, obs):
-        return obs[self.key]
-
-
-def make_env(**kwargs):
-    venv = ProcgenEnv(num_envs=1, num_threads=0, **kwargs)
-    env = Scalarize(venv)
-    env = RemoveDictObs(env, key="rgb")
-    return env
+def make_env(render=False, **kwargs):
+    if render:
+        kwargs["render_human"] = True
+    env = ProcgenGym3Env(num=1, num_threads=0, **kwargs)
+    env = ExtractDictObWrapper(env, key="rgb")
+    if render:
+        env = ViewerWrapper(env, tps=15, info_key="rgb")
+    gym_env = ToGymEnv(env)
+    return gym_env
 
 
 def register_environments():

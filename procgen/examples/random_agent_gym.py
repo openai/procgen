@@ -1,5 +1,5 @@
 """
-Example random agent script to demonstrate that procgen works
+Example random agent script using the gym API to demonstrate that procgen works
 """
 
 import gym
