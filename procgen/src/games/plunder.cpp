@@ -3,6 +3,8 @@
 #include <set>
 #include <queue>
 
+const std::string NAME = "plunder";
+
 const float COMPLETION_BONUS = 10.0f;
 const float POSITIVE_REWARD = 1.0f;
 
@@ -14,16 +16,22 @@ const int SHIP = 7;
 
 class PlunderGame : public BasicAbstractGame {
   public:
-    int last_fire_time;
+    int last_fire_time = 0;
     std::vector<bool> lane_directions, target_bools;
     std::vector<int> image_permutation;
     std::vector<float> lane_vels;
-    int num_lanes, num_current_ship_types;
-    int targets_hit, target_quota;
-    float juice_left, r_scale, spawn_prob, legend_r, min_agent_x;
+    int num_lanes = 0;
+    int num_current_ship_types = 0;
+    int targets_hit = 0;
+    int target_quota = 0;
+    float juice_left = 0.0f;
+    float r_scale = 0.0f;
+    float spawn_prob = 0.0f;
+    float legend_r = 0.0f;
+    float min_agent_x = 0.0f;
 
     PlunderGame()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         timeout = 4000;
 
         main_width = 20;
@@ -38,14 +46,14 @@ class PlunderGame : public BasicAbstractGame {
         main_bg_images_ptr = &water_surface_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
-        if (type == SHIP || type == TARGET_LEGEND || type == PLAYER) {
-            names.push_back(QString("misc_assets/ship_1"));
-            names.push_back(QString("misc_assets/ship_2"));
-            names.push_back(QString("misc_assets/ship_3"));
-            names.push_back(QString("misc_assets/ship_4"));
-            names.push_back(QString("misc_assets/ship_5"));
-            names.push_back(QString("misc_assets/ship_6"));
+    void asset_for_type(int type, std::vector<std::string> &names) override {
+        if (type == SHIP) {
+            names.push_back("misc_assets/ship_1.png");
+            names.push_back("misc_assets/ship_2.png");
+            names.push_back("misc_assets/ship_3.png");
+            names.push_back("misc_assets/ship_4.png");
+            names.push_back("misc_assets/ship_5.png");
+            names.push_back("misc_assets/ship_6.png");
         } else if (type == PLAYER_BULLET) {
             names.push_back("misc_assets/cannonBall.png");
         } else if (type == PANEL) {
@@ -70,6 +78,10 @@ class PlunderGame : public BasicAbstractGame {
 
     bool is_target(int theme_num) {
         return target_bools[theme_num];
+    }
+
+    bool should_preserve_type_themes(int type) override {
+        return type == SHIP;
     }
 
     void handle_collision(const std::shared_ptr<Entity> &src, const std::shared_ptr<Entity> &target) override {
@@ -103,6 +115,8 @@ class PlunderGame : public BasicAbstractGame {
 
     void game_reset() override {
         BasicAbstractGame::game_reset();
+
+        agent->image_type = SHIP;
 
         juice_left = 1;
         targets_hit = 0;
@@ -155,6 +169,7 @@ class PlunderGame : public BasicAbstractGame {
 
         auto ent = add_entity(legend_r, legend_r, 0, 0, r_scale * key_scale, TARGET_LEGEND);
         ent->image_theme = image_permutation[0];
+        ent->image_type = SHIP;
         match_aspect_ratio(ent);
         ent->rotation = PI / 2;
 
@@ -224,6 +239,42 @@ class PlunderGame : public BasicAbstractGame {
             agent->x = min_agent_x;
         }
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_int(last_fire_time);
+        b->write_vector_bool(lane_directions);
+        b->write_vector_bool(target_bools);
+        b->write_vector_int(image_permutation);
+        b->write_vector_float(lane_vels);
+        b->write_int(num_lanes);
+        b->write_int(num_current_ship_types);
+        b->write_int(targets_hit);
+        b->write_int(target_quota);
+        b->write_float(juice_left);
+        b->write_float(r_scale);
+        b->write_float(spawn_prob);
+        b->write_float(legend_r);
+        b->write_float(min_agent_x);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        last_fire_time = b->read_int();
+        lane_directions = b->read_vector_bool();
+        target_bools = b->read_vector_bool();
+        image_permutation = b->read_vector_int();
+        lane_vels = b->read_vector_float();
+        num_lanes = b->read_int();
+        num_current_ship_types = b->read_int();
+        targets_hit = b->read_int();
+        target_quota = b->read_int();
+        juice_left = b->read_float();
+        r_scale = b->read_float();
+        spawn_prob = b->read_float();
+        legend_r = b->read_float();
+        min_agent_x = b->read_float();
+    }
 };
 
-REGISTER_GAME("plunder", PlunderGame);
+REGISTER_GAME(NAME, PlunderGame);

@@ -8,11 +8,17 @@ import sys
 import platform
 import multiprocessing as mp
 
+import gym3
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 global_build_lock = threading.Lock()
 global_builds = set()
+
+
+class RunFailure(Exception):
+    pass
 
 
 @contextlib.contextmanager
@@ -38,25 +44,12 @@ def run(cmd):
 def check(proc, verbose):
     if proc.returncode != 0:
         print(f"RUN FAILED {proc.args}:\n{proc.stdout}")
-        raise Exception("failed to build procgen from source")
+        raise RunFailure("failed to build procgen from source")
     if verbose:
         print(f"RUN {proc.args}:\n{proc.stdout}")
 
 
-def build(package=False, debug=False):
-    """
-    Build the requested environment in a process-safe manner and only once per process.
-    """
-    build_dir = os.path.join(SCRIPT_DIR, ".build")
-    os.makedirs(build_dir, exist_ok=True)
-
-    build_type = "relwithdebinfo"
-    if debug:
-        build_type = "debug"
-
-    if "MAKEFLAGS" not in os.environ:
-        os.environ["MAKEFLAGS"] = f"-j{mp.cpu_count()}"
-
+def _attempt_configure(build_type, package):
     if "PROCGEN_CMAKE_PREFIX_PATH" in os.environ:
         cmake_prefix_paths = [os.environ["PROCGEN_CMAKE_PREFIX_PATH"]]
     else:
@@ -76,6 +69,37 @@ def build(package=False, debug=False):
             # prepend this qt since it's likely to be loaded already by the python process
             cmake_prefix_paths.insert(0, conda_cmake_path)
 
+    generator = "Unix Makefiles"
+    if platform.system() == "Windows":
+        generator = "Visual Studio 15 2017 Win64"
+    configure_cmd = [
+        "cmake",
+        "-G",
+        generator,
+        "-DCMAKE_PREFIX_PATH=" + ";".join(cmake_prefix_paths),
+        f"-DLIBENV_DIR={gym3.libenv.get_header_dir()}",
+        "../..",
+    ]
+    if package:
+        configure_cmd.append("-DPROCGEN_PACKAGE=ON")
+    if platform.system() != "Windows":
+        # this is not used on windows, the option needs to be passed to cmake --build instead
+        configure_cmd.append(f"-DCMAKE_BUILD_TYPE={build_type}")
+
+    check(run(configure_cmd), verbose=package)
+
+
+def build(package=False, debug=False):
+    """
+    Build the requested environment in a process-safe manner and only once per process.
+    """
+    build_dir = os.path.join(SCRIPT_DIR, ".build")
+    os.makedirs(build_dir, exist_ok=True)
+
+    build_type = "relwithdebinfo"
+    if debug:
+        build_type = "debug"
+
     with chdir(build_dir), global_build_lock:
         # check if we have built yet in this process
         if build_type not in global_builds:
@@ -85,39 +109,31 @@ def build(package=False, debug=False):
             else:
                 # prevent multiple processes from trying to build at the same time
                 import filelock
+
                 lock_ctx = filelock.FileLock(".build-lock")
             with lock_ctx:
-                os.makedirs(build_type, exist_ok=True)
-                with chdir(build_type):
-                    sys.stdout.write("building procgen...")
+                sys.stdout.write("building procgen...")
+                sys.stdout.flush()
+                try:
+                    os.makedirs(build_type, exist_ok=True)
+                    with chdir(build_type):
+                        _attempt_configure(build_type, package)
+                except RunFailure:
+                    # cmake can get into a weird state, so nuke the build directory and retry once
+                    sys.stdout.write("retrying configure due to failure...")
                     sys.stdout.flush()
-                    generator = "Unix Makefiles"
-                    if platform.system() == "Windows":
-                        generator = "Visual Studio 15 2017 Win64"
-                    configure_cmd = [
-                        "cmake",
-                        "-G", generator,
-                        "-DCMAKE_PREFIX_PATH=" + ";".join(cmake_prefix_paths),
-                        "../..",
-                    ]
-                    if package:
-                        configure_cmd.append("-DPROCGEN_PACKAGE=ON")
-                    if platform.system() != "Windows":
-                        # this is not used on windows, the option needs to be passed to cmake --build instead
-                        configure_cmd.append(f"-DCMAKE_BUILD_TYPE={build_type}")
+                    shutil.rmtree(build_type)
+                    os.makedirs(build_type, exist_ok=True)
+                    with chdir(build_type):
+                        _attempt_configure(build_type, package)
 
-                    p = run(configure_cmd)
-                    if "CMakeCache.txt is different" in p.stdout:
-                        # if the folder is moved we can end up with an invalid CMakeCache.txt
-                        # in which case we should re-run configure
-                        os.remove("CMakeCache.txt")
-                        check(run(configure_cmd), verbose=package)
-                    else:
-                        check(p, verbose=package)
+                if "MAKEFLAGS" not in os.environ:
+                    os.environ["MAKEFLAGS"] = f"-j{mp.cpu_count()}"
 
+                with chdir(build_type):
                     build_cmd = ["cmake", "--build", ".", "--config", build_type]
                     check(run(build_cmd), verbose=package)
-                    print("done")
+                print("done")
 
             global_builds.add(build_type)
 

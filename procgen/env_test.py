@@ -1,30 +1,30 @@
 import numpy as np
 import pytest
 from .env import ENV_NAMES
-from procgen import ProcgenEnv
+from procgen import ProcgenGym3Env
 
 
 @pytest.mark.parametrize("env_name", ["coinrun", "starpilot"])
 def test_seeding(env_name):
     num_envs = 1
 
-    def make_venv(level_num):
-        venv = ProcgenEnv(
-            num_envs=num_envs, env_name=env_name, num_levels=1, start_level=level_num
+    def make_env(level_num):
+        venv = ProcgenGym3Env(
+            num=num_envs, env_name=env_name, num_levels=1, start_level=level_num
         )
         return venv
 
-    venv1 = make_venv(0)
-    venv2 = make_venv(0)
-    venv3 = make_venv(1)
+    env1 = make_env(0)
+    env2 = make_env(0)
+    env3 = make_env(1)
 
-    venv1.reset()
-    venv2.reset()
-    venv3.reset()
+    env1.act(np.zeros(num_envs))
+    env2.act(np.zeros(num_envs))
+    env3.act(np.zeros(num_envs))
 
-    obs1, _, _, _ = venv1.step(np.zeros(num_envs))
-    obs2, _, _, _ = venv2.step(np.zeros(num_envs))
-    obs3, _, _, _ = venv3.step(np.zeros(num_envs))
+    _, obs1, _ = env1.observe()
+    _, obs2, _ = env2.observe()
+    _, obs3, _ = env3.observe()
 
     assert np.array_equal(obs1["rgb"], obs2["rgb"])
     assert not np.array_equal(obs1["rgb"], obs3["rgb"])
@@ -34,18 +34,16 @@ def test_seeding(env_name):
 def test_determinism(env_name):
     def collect_observations():
         rng = np.random.RandomState(0)
-        venv = ProcgenEnv(num_envs=2, env_name=env_name, rand_seed=23)
-        obs = venv.reset()
+        env = ProcgenGym3Env(num=2, env_name=env_name, rand_seed=23)
+        _, obs, _ = env.observe()
         obses = [obs["rgb"]]
         for _ in range(128):
-            obs, _rew, _done, _info = venv.step(
+            env.act(
                 rng.randint(
-                    low=0,
-                    high=venv.action_space.n,
-                    size=(venv.num_envs,),
-                    dtype=np.int32,
+                    low=0, high=env.ac_space.eltype.n, size=(env.num,), dtype=np.int32
                 )
             )
+            _, obs, _ = env.observe()
             obses.append(obs["rgb"])
         return np.array(obses)
 
@@ -57,17 +55,15 @@ def test_determinism(env_name):
 @pytest.mark.parametrize("env_name", ENV_NAMES)
 @pytest.mark.parametrize("num_envs", [1, 2, 16])
 def test_multi_speed(env_name, num_envs, benchmark):
-    venv = ProcgenEnv(num_envs=num_envs, env_name=env_name)
+    env = ProcgenGym3Env(num=num_envs, env_name=env_name)
 
-    venv.reset()
-    actions = np.zeros([venv.num_envs])
+    actions = np.zeros([env.num])
 
     def rollout(max_steps):
         step_count = 0
         while step_count < max_steps:
-            _obs, _rews, _dones, _infos = venv.step(actions)
+            env.act(actions)
+            env.observe()
             step_count += 1
 
     benchmark(lambda: rollout(1000))
-
-    venv.close()

@@ -3,6 +3,8 @@
 #include <set>
 #include <queue>
 
+const std::string NAME = "miner";
+
 const float COMPLETION_BONUS = 10.0;
 const int DIAMOND_REWARD = 1.0;
 
@@ -18,10 +20,10 @@ const int OOB_WALL = 10;
 
 class MinerGame : public BasicAbstractGame {
   public:
-    int diamonds_remaining;
+    int diamonds_remaining = 0;
 
     MinerGame()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         main_width = 20;
         main_height = 20;
 
@@ -37,7 +39,7 @@ class MinerGame : public BasicAbstractGame {
         main_bg_images_ptr = &platform_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == PLAYER) {
             names.push_back("misc_assets/robot_greenDrive1.png");
         } else if (type == BOULDER) {
@@ -310,6 +312,16 @@ class MinerGame : public BasicAbstractGame {
             }
         }
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_int(diamonds_remaining);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        diamonds_remaining = b->read_int();
+    }
 };
 
-REGISTER_GAME("miner", MinerGame);
+REGISTER_GAME(NAME, MinerGame);

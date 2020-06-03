@@ -4,6 +4,8 @@
 #include <queue>
 #include "../mazegen.h"
 
+const std::string NAME = "ninja";
+
 const float GOAL_REWARD = 10.0f;
 
 const int GOAL = 1;
@@ -20,14 +22,17 @@ const int NUM_WALL_THEMES = 3;
 
 class Ninja : public BasicAbstractGame {
   public:
-    std::shared_ptr<Entity> goal;
-    int world_len, world_dim;
-    bool has_support, facing_right;
-    int last_fire_time, wall_theme;
-    float gravity, air_control, jump_charge, jump_charge_inc;
+    bool has_support = false;
+    bool facing_right = false;
+    int last_fire_time = 0;
+    int wall_theme = 0;
+    float gravity = 0.0f;
+    float air_control = 0.0f;
+    float jump_charge = 0.0f;
+    float jump_charge_inc = 0.0f;
 
     Ninja()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         main_width = 64;
         main_height = 64;
 
@@ -38,7 +43,7 @@ class Ninja : public BasicAbstractGame {
         main_bg_images_ptr = &platform_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         std::shared_ptr<QImage> asset_ptr = nullptr;
 
         if (type == WALL_MID) {
@@ -404,6 +409,30 @@ class Ninja : public BasicAbstractGame {
             last_fire_time = cur_time;
         }
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_bool(has_support);
+        b->write_bool(facing_right);
+        b->write_int(last_fire_time);
+        b->write_int(wall_theme);
+        b->write_float(gravity);
+        b->write_float(air_control);
+        b->write_float(jump_charge);
+        b->write_float(jump_charge_inc);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        has_support = b->read_bool();
+        facing_right = b->read_bool();
+        last_fire_time = b->read_int();
+        wall_theme = b->read_int();
+        gravity = b->read_float();
+        air_control = b->read_float();
+        jump_charge = b->read_float();
+        jump_charge_inc = b->read_float();
+    }
 };
 
-REGISTER_GAME("ninja", Ninja);
+REGISTER_GAME(NAME, Ninja);

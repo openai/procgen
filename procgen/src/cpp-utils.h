@@ -1,6 +1,9 @@
 #pragma once
 
 #include <set>
+#include <cctype>
+#include <string>
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -40,10 +43,17 @@ void fatal(const char *fmt, ...);
 inline double sign(double x) {
     return x > 0 ? +1 : (x == 0 ? 0 : -1);
 }
+
 inline float clip_abs(float x, float y) {
     if (x > y)
         return y;
     if (x < -y)
         return -y;
     return x;
+}
+
+inline std::string to_lower(std::string s) {
+    auto lc = s;
+    transform(lc.begin(), lc.end(), lc.begin(), [](unsigned char c){ return std::tolower(c); }); 
+    return lc;
 }

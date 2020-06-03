@@ -6,6 +6,7 @@ Base game class used by all currently existing games
 
 */
 
+#include <string>
 #include <set>
 #include <queue>
 #include "game.h"
@@ -16,7 +17,7 @@ class BasicAbstractGame : public Game {
   public:
     int grid_size = 0;
 
-    BasicAbstractGame();
+    BasicAbstractGame(std::string name);
     ~BasicAbstractGame();
 
     // Game methods
@@ -24,6 +25,11 @@ class BasicAbstractGame : public Game {
     void game_reset() override;
     void game_draw(QPainter &p, const QRect &rect) override;
     void game_init() override;
+    void serialize(WriteBuffer *b) override;
+    void deserialize(ReadBuffer *b) override;
+
+    void write_entities(WriteBuffer *b, std::vector<std::shared_ptr<Entity>> &ents);
+    void read_entities(ReadBuffer *b, std::vector<std::shared_ptr<Entity>> &ents);
 
     virtual bool is_blocked(const std::shared_ptr<Entity> &src, int target, bool is_horizontal);
     virtual bool is_blocked_ents(const std::shared_ptr<Entity> &src, const std::shared_ptr<Entity> &target, bool is_horizontal);
@@ -34,12 +40,13 @@ class BasicAbstractGame : public Game {
     virtual float get_agent_acceleration_scale();
     virtual bool use_block_asset(int type);
     virtual float get_tile_aspect_ratio(const std::shared_ptr<Entity> &type);
-    virtual void asset_for_type(int type, std::vector<QString> &names);
+    virtual void asset_for_type(int type, std::vector<std::string> &names);
     virtual void load_background_images();
     virtual int image_for_type(int grid_obj);
     virtual int theme_for_grid_obj(int type);
-    virtual QColor color_for_type(int type);
-    virtual void draw_grid_obj(QPainter &p, const QRectF &rect, int obj);
+    virtual bool should_preserve_type_themes(int type);
+    virtual QColor color_for_type(int type, int theme);
+    virtual void draw_grid_obj(QPainter &p, const QRectF &rect, int type, int theme);
     virtual void choose_world_dim();
     virtual bool should_draw_entity(const std::shared_ptr<Entity> &entity);
     virtual void set_action_xy(int move_action);
@@ -47,7 +54,7 @@ class BasicAbstractGame : public Game {
     virtual void update_agent_velocity();
     virtual QRectF get_adjusted_image_rect(int type, const QRectF &rect);
 
-    void reserved_asset_for_type(int type, std::vector<QString> &names);
+    void reserved_asset_for_type(int type, std::vector<std::string> &names);
     void choose_step_random_theme(const std::shared_ptr<Entity> &ent);
     bool use_procgen_asset(int type);
     void decay_agent_velocity();
@@ -78,6 +85,7 @@ class BasicAbstractGame : public Game {
     void match_aspect_ratio(const std::shared_ptr<Entity> &ent, bool match_width = true);
     void fit_aspect_ratio(const std::shared_ptr<Entity> &ent);
     void choose_random_theme(const std::shared_ptr<Entity> &ent);
+    int mask_theme_if_necessary(int theme, int type);
     void tile_image(QPainter &p, QImage *image, const QRectF &rect, float tile_ratio);
 
     float rand_pos(float r, float max);
@@ -88,6 +96,7 @@ class BasicAbstractGame : public Game {
     bool is_out_of_bounds(const std::shared_ptr<Entity> &e1);
     bool push_obj(const std::shared_ptr<Entity> &src, const std::shared_ptr<Entity> &target, bool is_horizontal, int depth);
     float get_theta(const std::shared_ptr<Entity> &src, const std::shared_ptr<Entity> &target);
+    int find_entity_index(int type);
 
     QRectF get_screen_rect(float x, float y, float dx, float dy, float render_eps = 0);
     QRectF get_abs_rect(float x, float y, float dx, float dy);
@@ -111,7 +120,7 @@ class BasicAbstractGame : public Game {
 
     std::vector<float> asset_aspect_ratios;
     std::vector<int> asset_num_themes;
-
+    
     bool use_procgen_background = false;
     int background_index = 0;
     float bg_tile_ratio = 0.0f;

@@ -19,8 +19,8 @@ const int USE_ASSET_THRESHOLD = 100;
 const int MAX_ASSETS = USE_ASSET_THRESHOLD;
 const int MAX_IMAGE_THEMES = 10;
 
-BasicAbstractGame::BasicAbstractGame()
-    : Game() {
+BasicAbstractGame::BasicAbstractGame(std::string name)
+    : Game(name) {
     char_dim = 5;
 
     main_width = 0;
@@ -83,10 +83,12 @@ void BasicAbstractGame::initialize_asset_if_necessary(int img_idx) {
     int type = img_idx % MAX_ASSETS;
     int theme = img_idx / MAX_ASSETS;
 
+    theme = mask_theme_if_necessary(theme, type);
+
     std::shared_ptr<QImage> asset_ptr = nullptr;
     float aspect_ratio;
     int num_themes;
-    std::vector<QString> names;
+    std::vector<std::string> names;
 
     if (!options.use_generated_assets) {
         asset_for_type(type, names);
@@ -107,7 +109,7 @@ void BasicAbstractGame::initialize_asset_if_necessary(int img_idx) {
         num_themes = 1;
         aspect_ratio = 1.0;
     } else {
-        asset_ptr = load_resource_ptr(names[theme]);
+        asset_ptr = get_asset_ptr(names[theme]);
         num_themes = (int)(names.size());
         aspect_ratio = asset_ptr->width() * 1.0 / asset_ptr->height();
     }
@@ -408,10 +410,10 @@ float BasicAbstractGame::get_tile_aspect_ratio(const std::shared_ptr<Entity> &ty
     return 0;
 }
 
-void BasicAbstractGame::asset_for_type(int type, std::vector<QString> &names) {
+void BasicAbstractGame::asset_for_type(int type, std::vector<std::string> &names) {
 }
 
-void BasicAbstractGame::reserved_asset_for_type(int type, std::vector<QString> &names) {
+void BasicAbstractGame::reserved_asset_for_type(int type, std::vector<std::string> &names) {
     if (type == EXPLOSION) {
         names.push_back("misc_assets/explosion1.png");
     } else if (type == EXPLOSION2) {
@@ -441,17 +443,38 @@ int BasicAbstractGame::theme_for_grid_obj(int type) {
     return 0;
 }
 
-QColor BasicAbstractGame::color_for_type(int type) {
+bool BasicAbstractGame::should_preserve_type_themes(int type) {
+    return false;
+}
+
+int BasicAbstractGame::mask_theme_if_necessary(int theme, int type) {
+    if (options.restrict_themes && !should_preserve_type_themes(type)) return 0;
+    return theme;
+}
+
+QColor BasicAbstractGame::color_for_type(int type, int theme) {
     QColor color;
 
-    if (type == WALL_OBJ) {
-        color = QColor(0, 0, 0);
-    } else if (type == COIN_OBJ) {
-        color = QColor(255, 255, 0);
-    } else if (type == MARKER_OBJ) {
-        color = QColor(255, 0, 255);
+    if (options.use_monochrome_assets) {
+        theme = mask_theme_if_necessary(theme, type);
+
+        int k = 4;
+        int kcubed = k * k * k;
+        int chunk = 256 / k;
+        fassert(type < kcubed);
+
+        int p1 = 29;
+        int p2 = 19;
+        // kcubed, p1, and p2 should be relatively prime
+        // there will be no type collisons for a fixed theme
+        // there will be no theme collisions for a fixed type
+        // unique (type, theme) pairs might collide, but this is unlikely to be very relevant
+        int new_type = (p1 * (type + 1)) % kcubed;
+        new_type = (new_type + p2 * theme) % kcubed;
+
+        color = QColor(chunk * (new_type / (k * k) + 1) - 1, chunk * ((new_type / k) % k + 1) - 1, chunk * (new_type % k + 1) - 1);
     } else {
-        color = QColor(255, 0, 0);
+        fassert(false);
     }
 
     return color;
@@ -854,9 +877,13 @@ QImage *BasicAbstractGame::lookup_asset(int img_idx, bool is_reflected) {
 void BasicAbstractGame::draw_image(QPainter &p, QRectF &base_rect, float rotation, bool is_reflected, int base_type, int theme, float alpha, float tile_ratio) {
     int img_type = image_for_type(base_type);
 
-    if (img_type >= USE_ASSET_THRESHOLD) {
-        draw_grid_obj(p, base_rect, img_type);
-    } else if (img_type >= 0) {
+    if (img_type < 0) {
+        return;
+    }
+
+    if (options.use_monochrome_assets || img_type >= USE_ASSET_THRESHOLD) {
+        draw_grid_obj(p, base_rect, img_type, theme);
+    } else {
         int img_idx = img_type + theme * MAX_ASSETS;
         fassert(theme < MAX_IMAGE_THEMES);
 
@@ -885,10 +912,10 @@ void BasicAbstractGame::draw_image(QPainter &p, QRectF &base_rect, float rotatio
     }
 }
 
-void BasicAbstractGame::draw_grid_obj(QPainter &p, const QRectF &rect, int type) {
+void BasicAbstractGame::draw_grid_obj(QPainter &p, const QRectF &rect, int type, int theme) {
     if (type == SPACE)
         return;
-    p.fillRect(rect, color_for_type(type));
+    p.fillRect(rect, color_for_type(type, theme));
 }
 
 void BasicAbstractGame::draw_foreground(QPainter &p, const QRect &rect) {
@@ -953,6 +980,10 @@ void BasicAbstractGame::draw_background(QPainter &p, const QRect &rect) {
     p.fillRect(rect, QColor(0, 0, 0));
 
     prepare_for_drawing(rect.height());
+
+    if (!options.use_backgrounds) {
+        return;
+    }
 
     QRectF main_rect = get_screen_rect(0, main_height, main_width, main_height);
 
@@ -1099,9 +1130,159 @@ bool BasicAbstractGame::has_agent_collision(const std::shared_ptr<Entity> &e1) {
     return has_collision(e1, agent, e1->collision_margin);
 }
 
+int BasicAbstractGame::find_entity_index(int type) {
+    int index = -1;
+
+    for (size_t i = 0; i < entities.size(); i++) {
+        if (entities[i]->type == type) {
+            index = i;
+        }
+    }
+
+    return index;
+}
+
 bool BasicAbstractGame::has_collision(const std::shared_ptr<Entity> &e1, const std::shared_ptr<Entity> &e2, float margin) {
     float threshold_x = (e1->rx + e2->rx) + margin;
     float threshold_y = (e1->ry + e2->ry) + margin;
 
     return (fabs(e1->x - e2->x) < threshold_x) && (fabs(e1->y - e2->y) < threshold_y);
+}
+
+void BasicAbstractGame::write_entities(WriteBuffer *b, std::vector<std::shared_ptr<Entity>> &ents) {
+    b->write_int(ents.size());
+
+    for (size_t i = 0; i < ents.size(); i++) {
+        ents[i]->serialize(b);
+    }
+}
+
+void BasicAbstractGame::read_entities(ReadBuffer *b, std::vector<std::shared_ptr<Entity>> &ents) {
+    ents.resize(b->read_int());
+    for (size_t i = 0; i < ents.size(); i++) {
+        auto e = std::make_shared<Entity>();
+        e->deserialize(b);
+        ents[i] = e;
+    }
+}
+
+void BasicAbstractGame::serialize(WriteBuffer *b) {
+    Game::serialize(b);
+
+    b->write_int(grid_size);
+
+    write_entities(b, entities);
+
+    fassert(!options.use_generated_assets);
+    // these will be cleared and re-generated instead of being saved
+//     std::vector<std::shared_ptr<QImage>> basic_assets;
+//     std::vector<std::shared_ptr<QImage>> basic_reflections;
+//     std::vector<std::shared_ptr<QImage>> *main_bg_images_ptr;
+
+    // std::vector<float> asset_aspect_ratios;
+    // std::vector<int> asset_num_themes;
+
+    b->write_int(use_procgen_background);
+    b->write_int(background_index);
+    b->write_float(bg_tile_ratio);
+    b->write_float(bg_pct_x);
+
+    b->write_float(char_dim);
+    b->write_int(last_move_action);
+    b->write_int(move_action);
+    b->write_int(special_action);
+    b->write_float(mixrate);
+    b->write_float(maxspeed);
+    b->write_float(max_jump);
+
+    b->write_float(action_vx);
+    b->write_float(action_vy);
+    b->write_float(action_vrot);
+
+    b->write_float(center_x);
+    b->write_float(center_y);
+
+    b->write_int(random_agent_start);
+    b->write_int(has_useful_vel_info);
+    b->write_int(step_rand_int);
+
+    asset_rand_gen.serialize(b);
+
+    b->write_int(main_width);
+    b->write_int(main_height);
+    b->write_int(out_of_bounds_object);
+
+    b->write_float(unit);
+    b->write_float(view_dim);
+    b->write_float(x_off);
+    b->write_float(y_off);
+    b->write_float(visibility);
+    b->write_float(min_visibility);
+
+    grid.serialize(b);
+}
+
+void BasicAbstractGame::deserialize(ReadBuffer *b) {
+    Game::deserialize(b);
+
+    grid_size = b->read_int();
+
+    read_entities(b, entities);
+
+    int agent_idx = find_entity_index(PLAYER);
+    fassert(agent_idx >= 0);
+    agent = entities[agent_idx];
+
+    // we don't want to serialize a bunch of QImages
+    // for now we only support games that don't require storing these assets
+    fassert(!options.use_generated_assets);
+
+    // when restoring state (to the same game type) with generated assets disabled, these data structures contain cached
+    // asset data, and missing data will be filled in the same way in all environments
+//     std::vector<std::shared_ptr<QImage>> basic_assets;
+//     std::vector<std::shared_ptr<QImage>> basic_reflections;
+    // main_bg_images_ptr is set in game_init for all supported games, so it should always be the same
+//     std::vector<std::shared_ptr<QImage>> *main_bg_images_ptr;
+
+    // std::vector<float> asset_aspect_ratios;
+    // std::vector<int> asset_num_themes;
+
+    use_procgen_background = b->read_int();
+    background_index = b->read_int();
+    bg_tile_ratio = b->read_float();
+    bg_pct_x = b->read_float();
+
+    char_dim = b->read_float();
+    last_move_action = b->read_int();
+    move_action = b->read_int();
+    special_action = b->read_int();
+    mixrate = b->read_float();
+    maxspeed = b->read_float();
+    max_jump = b->read_float();
+
+    action_vx = b->read_float();
+    action_vy = b->read_float();
+    action_vrot = b->read_float();
+
+    center_x = b->read_float();
+    center_y = b->read_float();
+
+    random_agent_start = b->read_int();
+    has_useful_vel_info = b->read_int();
+    step_rand_int = b->read_int();
+
+    asset_rand_gen.deserialize(b);
+
+    main_width = b->read_int();
+    main_height = b->read_int();
+    out_of_bounds_object = b->read_int();
+
+    unit = b->read_float();
+    view_dim = b->read_float();
+    x_off = b->read_float();
+    y_off = b->read_float();
+    visibility = b->read_float();
+    min_visibility = b->read_float();
+
+    grid.deserialize(b);
 }

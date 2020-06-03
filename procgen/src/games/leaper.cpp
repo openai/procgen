@@ -1,6 +1,8 @@
 #include "../basic-abstract-game.h"
 #include "../qt-utils.h"
 
+const std::string NAME = "leaper";
+
 const int LOG = 1;
 const int ROAD = 2;
 const int WATER = 3;
@@ -24,14 +26,14 @@ float sign(float x) {
 
 class LeaperGame : public BasicAbstractGame {
   public:
-    int bottom_road_y;
+    int bottom_road_y = 0;
     std::vector<float> road_lane_speeds;
-    int bottom_water_y;
+    int bottom_water_y = 0;
     std::vector<float> water_lane_speeds;
-    int goal_y;
+    int goal_y = 0;
 
     LeaperGame()
-        : BasicAbstractGame() {
+        : BasicAbstractGame(NAME) {
         maxspeed = MAX_SPEED;
         timeout = 500;
     }
@@ -40,17 +42,17 @@ class LeaperGame : public BasicAbstractGame {
         main_bg_images_ptr = &topdown_backgrounds;
     }
 
-    void asset_for_type(int type, std::vector<QString> &names) override {
+    void asset_for_type(int type, std::vector<std::string> &names) override {
         if (type == ROAD) {
             names.push_back("misc_assets/roadTile6b.png");
         } else if (type == WATER) {
             names.push_back("misc_assets/terrainTile6.png");
         } else if (type == CAR) {
+            names.push_back("misc_assets/car_yellow_5.png");
             names.push_back("misc_assets/car_black_1.png");
             names.push_back("misc_assets/car_blue_2.png");
             names.push_back("misc_assets/car_green_3.png");
             names.push_back("misc_assets/car_red_4.png");
-            names.push_back("misc_assets/car_yellow_5.png");
         } else if (type == LOG) {
             names.push_back("misc_assets/elementWood044.png");
         } else if (type == PLAYER) {
@@ -84,6 +86,10 @@ class LeaperGame : public BasicAbstractGame {
 
     bool use_block_asset(int type) override {
         return type == WATER || type == ROAD;
+    }
+
+    bool should_preserve_type_themes(int type) override {
+        return type == PLAYER;
     }
 
     float rand_sign() {
@@ -275,6 +281,24 @@ class LeaperGame : public BasicAbstractGame {
             step_data.done = true;
         }
     }
+
+    void serialize(WriteBuffer *b) override {
+        BasicAbstractGame::serialize(b);
+        b->write_int(bottom_road_y);
+        b->write_vector_float(road_lane_speeds);
+        b->write_int(bottom_water_y);
+        b->write_vector_float(water_lane_speeds);
+        b->write_int(goal_y);
+    }
+
+    void deserialize(ReadBuffer *b) override {
+        BasicAbstractGame::deserialize(b);
+        bottom_road_y = b->read_int();
+        road_lane_speeds = b->read_vector_float();
+        bottom_water_y = b->read_int();
+        water_lane_speeds = b->read_vector_float();
+        goal_y = b->read_int();
+    }
 };
 
-REGISTER_GAME("leaper", LeaperGame);
+REGISTER_GAME(NAME, LeaperGame);

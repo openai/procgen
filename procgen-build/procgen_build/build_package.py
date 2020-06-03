@@ -2,6 +2,7 @@ import platform
 from urllib.request import urlretrieve
 import os
 import subprocess as sp
+import fnmatch
 
 import blobfile as bf
 
@@ -37,6 +38,13 @@ def init_vsvars():
         os.environ[k] = v
 
 
+def get_var(pattern):
+    for key, value in os.environ:
+        if fnmatch.fnmatch(key, pattern):
+            return os.environ[key]
+    return None
+
+
 def setup_google_credentials():
     # brew install travis
     # travis login --org
@@ -46,10 +54,15 @@ def setup_google_credentials():
     # travis encrypt-file --org /tmp/key.json
     input_path = os.path.join(SCRIPT_DIR, "key.json.enc")
     output_path = os.path.join(os.getcwd(), "key.json")
-    if "encrypted_d853b3b05b79_key" not in os.environ:
+    for h in ["d853b3b05b79", "41b34d34b52c"]:
+        key = os.environ.get(f"encrypted_{h}_key")
+        iv = os.environ.get(f"encrypted_{h}_iv")
+        if key is not None:
+            break
+    if key is None:
         # being compiled on a fork
         return False
-    sp.run(["openssl", "aes-256-cbc", "-K", os.environ["encrypted_d853b3b05b79_key"], "-iv", os.environ["encrypted_d853b3b05b79_iv"], "-in", input_path, "-out", output_path, "-d"], check=True)
+    sp.run(["openssl", "aes-256-cbc", "-K", key, "-iv", iv, "-in", input_path, "-out", output_path, "-d"], check=True)
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = output_path
     return True
 
@@ -59,7 +72,7 @@ def main():
 
     os.environ.update(
         {
-            "CIBW_BUILD": "cp36-macosx_10_6_intel cp37-macosx_10_6_intel cp38-macosx_10_9_x86_64 cp36-manylinux_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64 cp36-win_amd64 cp37-win_amd64 cp38-win_amd64",
+            "CIBW_BUILD": "cp36-macosx_x86_64 cp37-macosx_x86_64 cp38-macosx_x86_64 cp36-manylinux_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64 cp36-win_amd64 cp37-win_amd64 cp38-win_amd64",
             "CIBW_BEFORE_BUILD": "pip install -e procgen-build && python -u -m procgen_build.build_qt --output-dir /tmp/qt5",
             "CIBW_TEST_EXTRAS": "test",
             # the --pyargs option causes pytest to use the installed procgen wheel
@@ -95,7 +108,7 @@ def main():
     elif platform.system() == "Windows":
         init_vsvars()
 
-    run("pip install cibuildwheel==1.0.0")
+    run("pip install cibuildwheel==1.4.1")
     run("cibuildwheel --output-dir wheelhouse")
 
     if have_credentials:
