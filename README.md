@@ -177,7 +177,7 @@ python -c "from procgen import ProcgenGym3Env; ProcgenGym3Env(num=1, env_name='c
 python -m procgen.interactive
 ```
 
-The environment code is in C++ and is compiled into a shared library loaded by python using a C interface using [`gym3.libenv`](https://github.com/gym3).  The C++ code uses [Qt](https://www.qt.io/) for drawing.
+The environment code is in C++ and is compiled into a shared library exposing the [`gym3.libenv`](https://github.com/openai/gym3/blob/master/gym3/libenv.h) C interface that is then loaded by python.  The C++ code uses [Qt](https://www.qt.io/) for drawing.
 
 # Create a new environment
 
