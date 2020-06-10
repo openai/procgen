@@ -6,6 +6,8 @@
 
 16 simple-to-use procedurally-generated [gym](https://github.com/openai/gym) environments which provide a direct measure of how quickly a reinforcement learning agent learns generalizable skills.  The environments run at high speed (thousands of steps per second) on a single core.
 
+We're currently running a competition which uses these environments to measure sample efficiency and generalization in RL. You can learn more and register [here](https://www.aicrowd.com/challenges/neurips-2020-procgen-competition).
+
 <img src="https://raw.githubusercontent.com/openai/procgen/master/screenshots/procgen.gif">
 
 These environments are associated with the paper [Leveraging Procedural Generation to Benchmark Reinforcement Learning](https://cdn.openai.com/procgen.pdf) [(citation)](#citation).  The code for running some experiments from the paper is in the [train-procgen](https://github.com/openai/train-procgen) repo.  For those familiar with the original [CoinRun environment](https://github.com/openai/coinrun), be sure to read the updated CoinRun description below as there have been subtle changes to the environment.
