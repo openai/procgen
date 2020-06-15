@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.3
+
+* fix render option for gym environment
+
 ## 0.10.2
 
 * fix interactive script

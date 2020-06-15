@@ -5,7 +5,7 @@ from .env import ENV_NAMES, ProcgenGym3Env
 
 def make_env(render=False, **kwargs):
     if render:
-        kwargs["render_human"] = True
+        kwargs["render_mode"] = "rgb_array"
     env = ProcgenGym3Env(num=1, num_threads=0, **kwargs)
     env = ExtractDictObWrapper(env, key="rgb")
     if render:

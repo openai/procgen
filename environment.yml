@@ -9,7 +9,7 @@ dependencies:
   - qt=5.12.5  # conda-forge does not have 5.13.2 available
   - pip
   - pip:
-    - gym3==0.3.1
+    - gym3==0.3.2
     - numpy==1.17.2
     - gym==0.15.3
     - filelock==3.0.10
