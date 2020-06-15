@@ -71,7 +71,7 @@ To create an instance of the [gym3](https://github.com/openai/gym3) (vectorized)
 
 ```
 from procgen import ProcgenGym3Env
-env = ProcgenGym3Env(num_envs=1, env_name="coinrun")
+env = ProcgenGym3Env(num=1, env_name="coinrun")
 ```
 
 ### Docker
