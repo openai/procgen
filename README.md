@@ -144,6 +144,8 @@ from procgen import ProcgenGym3Env
 env = ProcgenGym3Env(num=1, env_name="coinrun", start_level=0, num_levels=1)
 ```
 
+To render with the gym3 environment, pass `render_mode="rgb_array"`.  If you wish to view the output, use a `gym3.ViewerWrapper`.
+
 ## Saving and loading the environment state
 
 If you are using the gym3 interface, you can save and load the environment state:
