@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.4
+
+* Support `render_mode` to gym environment and update docs to remove references to the confusing `render=True` option.
+
 ## 0.10.3
 
 * fix render option for gym environment
