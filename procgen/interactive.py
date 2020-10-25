@@ -47,26 +47,80 @@ def make_interactive(vision, record_dir, **kwargs):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--vision", choices=["agent", "human"], default="human")
+    default_str = "(default: %(default)s)"
+    parser = argparse.ArgumentParser(
+        description="Interactive version of Procgen allowing you to play the games"
+    )
+    parser.add_argument(
+        "--vision",
+        default="human",
+        choices=["agent", "human"],
+        help="level of fidelity of observation " + default_str,
+    )
     parser.add_argument("--record-dir", help="directory to record movies to")
     parser.add_argument(
         "--distribution-mode",
         default="hard",
-        help="which distribution mode to use for the level generation",
+        help="which distribution mode to use for the level generation " + default_str,
     )
     parser.add_argument(
         "--env-name",
         default="coinrun",
-        help="name of game to create",
+        help="name of game to create " + default_str,
         choices=ENV_NAMES + ["coinrun_old"],
     )
     parser.add_argument(
         "--level-seed", type=int, help="select an individual level to use"
     )
+
+    advanced_group = parser.add_argument_group("advanced optional switch arguments")
+    advanced_group.add_argument(
+        "--paint-vel-info",
+        action="store_true",
+        default=False,
+        help="paint player velocity info in the top left corner",
+    )
+    advanced_group.add_argument(
+        "--use-generated-assets",
+        action="store_true",
+        default=False,
+        help="use randomly generated assets in place of human designed assets",
+    )
+    advanced_group.add_argument(
+        "--uncenter-agent",
+        action="store_true",
+        default=False,
+        help="display the full level for games that center the observation to the agent",
+    )
+    advanced_group.add_argument(
+        "--disable-backgrounds",
+        action="store_true",
+        default=False,
+        help="disable human designed backgrounds",
+    )
+    advanced_group.add_argument(
+        "--restrict-themes",
+        action="store_true",
+        default=False,
+        help="restricts games that use multiple themes to use a single theme",
+    )
+    advanced_group.add_argument(
+        "--use-monochrome-assets",
+        action="store_true",
+        default=False,
+        help="use monochromatic rectangles instead of human designed assets",
+    )
+
     args = parser.parse_args()
 
-    kwargs = {}
+    kwargs = {
+        "paint_vel_info": args.paint_vel_info,
+        "use_generated_assets": args.use_generated_assets,
+        "center_agent": not args.uncenter_agent,
+        "use_backgrounds": not args.disable_backgrounds,
+        "restrict_themes": args.restrict_themes,
+        "use_monochrome_assets": args.use_monochrome_assets,
+    }
     if args.env_name != "coinrun_old":
         kwargs["distribution_mode"] = args.distribution_mode
     if args.level_seed is not None:
