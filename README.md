@@ -114,10 +114,10 @@ Here are the 16 environments:
 
 ## Known Issues
 
-`bigfish` - It is possible for the player to occasionally become trapped along the borders of the environment.
-`caveflyer` - In ~0.5% of levels, the player spawns next to an enemy and will die in a single step regardless of which action is taken.
-`jumper` - In ~7% of levels, the player will spawn on top of an enemy or the goal, resulting in the episode terminating after a single step regardless of which action is taken.
-`miner` - There is a low probability of unsolvable level configurations, with either a diamond or the exit being unreachable.
+* `bigfish` - It is possible for the player to occasionally become trapped along the borders of the environment.
+* `caveflyer` - In ~0.5% of levels, the player spawns next to an enemy and will die in a single step regardless of which action is taken.
+* `jumper` - In ~7% of levels, the player will spawn on top of an enemy or the goal, resulting in the episode terminating after a single step regardless of which action is taken.
+* `miner` - There is a low probability of unsolvable level configurations, with either a diamond or the exit being unreachable.
 
 Rather than patch these issues, we plan to keep the environments in their originally released form, in order to ease the reproducibility of results that are already published.
 
