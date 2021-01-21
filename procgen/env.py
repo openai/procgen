@@ -244,6 +244,21 @@ class ProcgenGym3Env(BaseProcgenEnv):
                 "distribution_mode": distribution_mode,
             }
         super().__init__(num, env_name, options, **kwargs)
+        
+        
+class ToBaselinesVecEnv(gym3.ToBaselinesVecEnv):
+    metadata = {
+        'render.modes': ['human', 'rgb_array'],
+        'video.frames_per_second' : 24
+    }
+    def render(self, mode="human"):
+        info = self.env.get_info()[0]
+        _, ob, _ = self.env.observe()
+        if mode == "rgb_array":
+            if "rgb" in info:
+                return info["rgb"]
+            else:
+                return ob['rgb'][0]        
 
 
 def ProcgenEnv(num_envs, env_name, **kwargs):
