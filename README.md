@@ -6,7 +6,7 @@
 
 16 simple-to-use procedurally-generated [gym](https://github.com/openai/gym) environments which provide a direct measure of how quickly a reinforcement learning agent learns generalizable skills.  The environments run at high speed (thousands of steps per second) on a single core.
 
-We're currently running a competition which uses these environments to measure sample efficiency and generalization in RL. You can learn more and register [here](https://www.aicrowd.com/challenges/neurips-2020-procgen-competition).
+We ran a competition in 2020 which used these environments to measure sample efficiency and generalization in RL. You can learn more [here](https://www.aicrowd.com/challenges/neurips-2020-procgen-competition).
 
 <img src="https://raw.githubusercontent.com/openai/procgen/master/screenshots/procgen.gif">
 
