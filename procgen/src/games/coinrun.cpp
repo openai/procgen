@@ -5,6 +5,9 @@
 #include "../mazegen.h"
 #include "../cpp-utils.h"
 #include "../qt-utils.h"
+#include <csignal>
+#include <iostream>
+using namespace std;
 
 const std::string NAME = "coinrun";
 
@@ -45,6 +48,7 @@ class CoinRun : public BasicAbstractGame {
     bool is_on_crate = false;
     float gravity = 0.0f;
     float air_control = 0.0f;
+    int32_t is_safe = 1;
 
     CoinRun()
         : BasicAbstractGame(NAME) {
@@ -123,10 +127,17 @@ class CoinRun : public BasicAbstractGame {
     void handle_agent_collision(const std::shared_ptr<Entity> &obj) override {
         BasicAbstractGame::handle_agent_collision(obj);
 
+        std::raise(SIGINT);
+
+        cout << "obj_type " << obj->type << endl;
         if (obj->type == ENEMY) {
             step_data.done = true;
+            is_safe = 0;
+            cout << "Collision! " << is_safe << endl;
         } else if (obj->type == SAW) {
             step_data.done = true;
+            is_safe = 0;
+            cout << "Collision! " << is_safe << endl;
         }
     }
 
@@ -171,6 +182,12 @@ class CoinRun : public BasicAbstractGame {
             agent->vy = clip_abs(agent->vy, max_jump);
         }
     }
+
+    void observe() override {
+        Game::observe();
+        *(int32_t *)(info_bufs[info_name_to_offset.at("is_safe")]) = is_safe;
+    }
+
 
     bool is_wall(int type) {
         return type == WALL_MID || type == WALL_TOP;
