@@ -81,13 +81,11 @@ def main():
             + f" CACHE_DIR=/host{os.getcwd()}/cache"
         )
     elif platform.system() == "Windows":
-        init_vsvars()
+        # init_vsvars()
+        pass
 
     run("pip install cibuildwheel==1.4.1")
-    try:
-        run("cibuildwheel --output-dir wheelhouse")
-    except Exception as e:
-        print(e)
+    run("cibuildwheel --output-dir wheelhouse")
 
     # if have_credentials:
     #     print("upload wheels", platform.system())

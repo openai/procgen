@@ -15,13 +15,14 @@ jobs:
         python-version: ["3.7"]
     steps:
       - uses: actions/checkout@v2
+      - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Cache Dependencies
         id: cache-dependencies
         uses: actions/cache@v2
         with:
           path: cache
-          key: ${{ runner.os }}-dependencies-v4
+          key: ${{ runner.os }}-dependencies-v5
 
       - name: Cache Found
         run: echo "cache found $CACHE_FOUND"
