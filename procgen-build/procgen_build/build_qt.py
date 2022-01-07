@@ -113,6 +113,12 @@ def build_qt(output_dir):
     def compile_qt():
         os.makedirs("build")
         os.chdir("build")
+        if platform.system() == "Darwin":
+            # QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
+            # find all qmake.conf files
+            print("find qmake.conf files")
+            run("find . -iname qmake.conf")
+            pass
         if platform.system() == "Windows":
             qt_configure = "..\\qt5\\configure"
         else:
