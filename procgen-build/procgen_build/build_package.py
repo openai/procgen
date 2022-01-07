@@ -73,8 +73,9 @@ def main():
     os.environ.update(
         {
             "CIBW_BUILD": "cp36-macosx_x86_64 cp37-macosx_x86_64 cp38-macosx_x86_64 cp36-manylinux_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64 cp36-win_amd64 cp37-win_amd64 cp38-win_amd64",
-            "CIBW_BEFORE_BUILD": "pip install -e procgen-build && python -u -m procgen_build.build_qt --output-dir /tmp/qt5",
+            "CIBW_BEFORE_BUILD": "pip install -r procgen-build/requirements.txt && pip install -e procgen-build && python -u -m procgen_build.build_qt --output-dir /tmp/qt5",
             "CIBW_TEST_EXTRAS": "test",
+            "CIBW_BEFORE_TEST": "pip install -r procgen-build/requirements.txt",
             # the --pyargs option causes pytest to use the installed procgen wheel
             "CIBW_TEST_COMMAND": "pytest --verbose --benchmark-disable --durations=16 --pyargs procgen",
             # this is where build-qt.py will put the files
