@@ -77,7 +77,7 @@ def main():
             )
         os.environ["CIBW_ENVIRONMENT"] = (
             os.environ["CIBW_ENVIRONMENT"]
-            + " INSIDE_DOCKER=1"
+            + f" CACHE_DIR=/host/{os.getcwd()}/cache"
         )
     elif platform.system() == "Windows":
         init_vsvars()
