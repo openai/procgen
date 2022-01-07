@@ -21,7 +21,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: cache
-          key: ${{ runner.os }}-dependencies-v3
+          key: ${{ runner.os }}-dependencies-v4
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -40,8 +40,6 @@ jobs:
         run: python -u -m procgen_build.build_package
       - name: Check cache
         run: ls cache
-      - name: Check cache
-        run: ls /cache
       # - name: Test
       #   run: python -u -m procgen_build.dev_test
 
