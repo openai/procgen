@@ -21,6 +21,10 @@ jobs:
       #     environment-file: environment.yml
       #     python-version: ${{ matrix.python-version }}
       - name: Install Procgen Build
+        run: pip --version
+      - name: Install Procgen Build
+        run: python --version
+      - name: Install Procgen Build
         run: python -m pip install -e procgen-build
       - name: Test
         run: python -u -m procgen_build.dev_test
