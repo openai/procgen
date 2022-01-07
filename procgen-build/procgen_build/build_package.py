@@ -4,7 +4,7 @@ import os
 import subprocess as sp
 import fnmatch
 
-import blobfile as bf
+# import blobfile as bf
 
 from .common import run, GCS_BUCKET
 
@@ -111,15 +111,15 @@ def main():
     run("pip install cibuildwheel==1.4.1")
     run("cibuildwheel --output-dir wheelhouse")
 
-    if have_credentials:
-        print("upload wheels", platform.system())
-        input_dir = "wheelhouse"
-        output_dir = f"gs://{GCS_BUCKET}/builds/"
-        for filename in bf.listdir(input_dir):
-            src = bf.join(input_dir, filename)
-            dst = bf.join(output_dir, filename)
-            print(src, "=>", dst)
-            bf.copy(src, dst, overwrite=True)
+    # if have_credentials:
+    #     print("upload wheels", platform.system())
+    #     input_dir = "wheelhouse"
+    #     output_dir = f"gs://{GCS_BUCKET}/builds/"
+    #     for filename in bf.listdir(input_dir):
+    #         src = bf.join(input_dir, filename)
+    #         dst = bf.join(output_dir, filename)
+    #         print(src, "=>", dst)
+    #         bf.copy(src, dst, overwrite=True)
 
 
 if __name__ == "__main__":
