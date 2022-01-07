@@ -106,6 +106,7 @@ def main():
                 os.environ["CIBW_ENVIRONMENT"]
                 + " TRAVIS_TAG=" + os.environ["TRAVIS_TAG"]
             )
+            os.environ["INSIDE_DOCKER"] = "1"
     elif platform.system() == "Windows":
         init_vsvars()
 

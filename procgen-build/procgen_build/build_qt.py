@@ -3,13 +3,12 @@ import multiprocessing as mp
 import os
 import time
 import tarfile
+import os
 import argparse
 import threading
 import platform
 import shutil
 import hashlib
-
-# import blobfile as bf
 
 from .common import run
 
@@ -22,32 +21,34 @@ def cache_folder(name, dirpath, options, build_fn):
         return
     
     options_hash = hashlib.md5("|".join(options).encode("utf8")).hexdigest()
-    # cache_path = bf.join(f"gs://{GCS_BUCKET}", "cache", f"{name}-{options_hash}.tar")
+    cache_path = os.path.join("cache", f"{name}-{options_hash}.tar")
+    if os.environ.get("INSIDE_DOCKER", "0") == "1":
+        cache_path = os.path.join("/host", cache_path)
     if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
         # we don't have any credentials to do the caching, always build in this case
         print(f"building without cache for {name}")
         start = time.time()
         build_fn()
         print(f"build elapsed {time.time() - start}")
-    # elif bf.exists(cache_path):
-    #     print(f"downloading cache for {name}: {cache_path}")
-    #     start = time.time()
-    #     with bf.BlobFile(cache_path, "rb") as f:
-    #         with tarfile.open(fileobj=f, mode="r") as tf:
-    #             tf.extractall()
-    #     print(f"download elapsed {time.time() - start}")
+    elif os.path.exists(cache_path):
+        print(f"downloading cache for {name}: {cache_path}")
+        start = time.time()
+        with open(cache_path, "rb") as f:
+            with tarfile.open(fileobj=f, mode="r") as tf:
+                tf.extractall()
+        print(f"download elapsed {time.time() - start}")
     else:
         print(f"building cache for {name}")
         start = time.time()
         build_fn()
         print(f"cache build elapsed {time.time() - start}")
-        # print(f"uploading cache for {name}")
-        # start = time.time()
-        # if not bf.exists(cache_path):
-        #     with bf.BlobFile(cache_path, "wb") as f:
-        #         with tarfile.open(fileobj=f, mode="w") as tf:
-        #             tf.add(dirpath)
-        # print(f"upload elapsed {time.time() - start}")
+        print(f"uploading cache for {name}")
+        start = time.time()
+        if not os.path.exists(cache_path):
+            with open(cache_path, "wb") as f:
+                with tarfile.open(fileobj=f, mode="w") as tf:
+                    tf.add(dirpath)
+        print(f"upload elapsed {time.time() - start}")
 
 # workaround for timeout error
 # https://docs.travis-ci.com/user/common-build-problems/#build-times-out-because-no-output-was-received
