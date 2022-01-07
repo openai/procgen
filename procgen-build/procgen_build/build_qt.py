@@ -11,7 +11,7 @@ import hashlib
 
 # import blobfile as bf
 
-from .common import run, GCS_BUCKET
+from .common import run
 
 BUILD_VERSION = 11
 

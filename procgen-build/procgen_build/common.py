@@ -3,9 +3,6 @@ import time
 import shlex
 
 
-GCS_BUCKET = "openai-procgen"
-
-
 def run(cmd, shell=True, **kwargs):
     print(f"RUN: {cmd}")
     start = time.time()

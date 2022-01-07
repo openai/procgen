@@ -6,7 +6,7 @@ import fnmatch
 
 # import blobfile as bf
 
-from .common import run, GCS_BUCKET
+from .common import run
 
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -105,6 +105,8 @@ def main():
                 os.environ["CIBW_ENVIRONMENT"]
                 + " TRAVIS_TAG=" + os.environ["TRAVIS_TAG"]
             )
+        # install dependencies for pillow, required for gym3, which is required for procgen.build
+        os.environ["CIBW_BEFORE_BUILD"] = "apt-get install libtiff5-dev libjpeg8-dev libopenjp2-7-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev libharfbuzz-dev libfribidi-dev libxcb1-dev && " + os.environ["CIBW_BEFORE_BUILD"]
     elif platform.system() == "Windows":
         init_vsvars()
 
