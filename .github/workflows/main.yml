@@ -32,6 +32,7 @@ jobs:
       #   run: python -m pip install -e procgen-build
       - name: Make dir
         run: mkdir -p cache
+        
       - name: Add to cache
         run: echo meow >> cache/meow.txt
       - name: Check cache
