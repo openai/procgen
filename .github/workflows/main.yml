@@ -21,7 +21,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: cache
-          key: ${{ runner.os }}-dependencies-v2
+          key: ${{ runner.os }}-dependencies-v3
 
       - name: Set up Python
         uses: actions/setup-python@v2
