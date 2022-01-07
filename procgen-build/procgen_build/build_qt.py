@@ -126,7 +126,7 @@ def build_qt(output_dir):
                     if file == "qmake.conf":
                         print(f"qmake: {path}")
                         print(open(path).read())
-            path = "../qt5/qtbase/mkspecs/macx-xcode/qmake.conf"
+            path = "../qt5/qtbase/mkspecs/macx-clang/qmake.conf"
             contents = open(path, "r").read()
             with open(path, "w") as f:
                 f.write("error\n")
