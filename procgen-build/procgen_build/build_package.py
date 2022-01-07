@@ -72,8 +72,8 @@ def main():
 
     os.environ.update(
         {
-            "CIBW_BUILD": "cp37-macosx_x86_64 cp38-macosx_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64 cp37-win_amd64 cp38-win_amd64",
-            "CIBW_BEFORE_BUILD": "pip install -e procgen-build && python -u -m procgen_build.build_qt --output-dir /tmp/qt5",
+            "CIBW_BUILD": "cp36-macosx_x86_64 cp37-macosx_x86_64 cp38-macosx_x86_64 cp36-manylinux_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64 cp36-win_amd64 cp37-win_amd64 cp38-win_amd64",
+            "CIBW_BEFORE_BUILD": "pip install --upgrade pip && pip install -e procgen-build && python -u -m procgen_build.build_qt --output-dir /tmp/qt5",
             "CIBW_TEST_EXTRAS": "test",
             # the --pyargs option causes pytest to use the installed procgen wheel
             "CIBW_TEST_COMMAND": "pytest --verbose --benchmark-disable --durations=16 --pyargs procgen",
