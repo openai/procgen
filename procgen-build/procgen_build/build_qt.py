@@ -116,7 +116,7 @@ def build_qt(output_dir):
         if platform.system() == "Darwin":
             # ../qt5/qtbase/mkspecs/macx-clang/qmake.conf
             # ../qt5/qtbase/mkspecs/macx-xcode/qmake.conf
-            # QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
+            # 
             # find all qmake.conf files
             print("find qmake.conf files")
             run("find ../qt5 -iname qmake.conf")
@@ -127,9 +127,22 @@ def build_qt(output_dir):
                         print(f"qmake: {path}")
                         print(open(path).read())
             path = "../qt5/qtbase/mkspecs/macx-clang/qmake.conf"
-            contents = open(path, "r").read()
+            contents = """\
+QMAKE_LIBS_X11 = -lX11 -lXext -lm
+QMAKE_LIBDIR_X11 = /opt/X11/lib
+QMAKE_INCDIR_X11 = /opt/X11/include
+
+include(../common/macx.conf)
+include(../common/gcc-base-mac.conf)
+include(../common/clang.conf)
+include(../common/clang-mac.conf)
+
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
+
+load(qt_config)
+"""
             with open(path, "w") as f:
-                f.write("error\n")
+                f.write(contents)
         if platform.system() == "Windows":
             qt_configure = "..\\qt5\\configure"
         else:
