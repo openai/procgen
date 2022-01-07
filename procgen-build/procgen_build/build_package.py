@@ -45,31 +45,7 @@ def get_var(pattern):
     return None
 
 
-def setup_google_credentials():
-    # brew install travis
-    # travis login --org
-    # gcloud iam service-accounts create procgen-travis-ci --project <project>
-    # gcloud iam service-accounts keys create /tmp/key.json --iam-account procgen-travis-ci@<project>.iam.gserviceaccount.com
-    # gsutil iam ch serviceAccount:procgen-travis-ci@<project>.iam.gserviceaccount.com:objectAdmin gs://{GCS_BUCKET}
-    # travis encrypt-file --org /tmp/key.json
-    input_path = os.path.join(SCRIPT_DIR, "key.json.enc")
-    output_path = os.path.join(os.getcwd(), "key.json")
-    for h in ["d853b3b05b79", "41b34d34b52c"]:
-        key = os.environ.get(f"encrypted_{h}_key")
-        iv = os.environ.get(f"encrypted_{h}_iv")
-        if key is not None:
-            break
-    if key is None:
-        # being compiled on a fork
-        return False
-    sp.run(["openssl", "aes-256-cbc", "-K", key, "-iv", iv, "-in", input_path, "-out", output_path, "-d"], check=True)
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = output_path
-    return True
-
-
 def main():
-    have_credentials = setup_google_credentials()
-
     os.environ.update(
         {
             "CIBW_BUILD": "cp36-macosx_x86_64 cp37-macosx_x86_64 cp38-macosx_x86_64 cp36-manylinux_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64 cp36-win_amd64 cp37-win_amd64 cp38-win_amd64",
@@ -93,20 +69,16 @@ def main():
         )
         os.environ["SSL_CERT_FILE"] = os.environ["TRAVIS_BUILD_DIR"] + "/cacert.pem"
     elif platform.system() == "Linux":
-        # since we're inside a docker container, adjust the credentials path to point at the mounted location
-        if have_credentials:
-            os.environ["CIBW_ENVIRONMENT"] = (
-                os.environ["CIBW_ENVIRONMENT"]
-                + " GOOGLE_APPLICATION_CREDENTIALS=/host"
-                + os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
-            )
         if "TRAVIS_TAG" in os.environ:
             # pass TRAVIS_TAG to the container so that it can build wheels with the correct version number
             os.environ["CIBW_ENVIRONMENT"] = (
                 os.environ["CIBW_ENVIRONMENT"]
                 + " TRAVIS_TAG=" + os.environ["TRAVIS_TAG"]
             )
-            os.environ["INSIDE_DOCKER"] = "1"
+        os.environ["CIBW_ENVIRONMENT"] = (
+            os.environ["CIBW_ENVIRONMENT"]
+            + " INSIDE_DOCKER=1"
+        )
     elif platform.system() == "Windows":
         init_vsvars()
 

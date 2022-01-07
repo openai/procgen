@@ -24,13 +24,7 @@ def cache_folder(name, dirpath, options, build_fn):
     cache_path = os.path.join("cache", f"{name}-{options_hash}.tar")
     if os.environ.get("INSIDE_DOCKER", "0") == "1":
         cache_path = os.path.join("/host", cache_path)
-    if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
-        # we don't have any credentials to do the caching, always build in this case
-        print(f"building without cache for {name}")
-        start = time.time()
-        build_fn()
-        print(f"build elapsed {time.time() - start}")
-    elif os.path.exists(cache_path):
+    if os.path.exists(cache_path):
         print(f"downloading cache for {name}: {cache_path}")
         start = time.time()
         with open(cache_path, "rb") as f:
@@ -45,6 +39,7 @@ def cache_folder(name, dirpath, options, build_fn):
         print(f"uploading cache for {name}")
         start = time.time()
         if not os.path.exists(cache_path):
+            os.makedirs(os.path.dirname(cache_path), exist_ok=True)
             with open(cache_path, "wb") as f:
                 with tarfile.open(fileobj=f, mode="w") as tf:
                     tf.add(dirpath)
