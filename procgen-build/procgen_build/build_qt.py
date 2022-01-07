@@ -76,6 +76,7 @@ def build_qt(output_dir):
     # downloading the source from git takes 25 minutes on travis
     # so cache the source so we don't have to use git
     cache_folder("qt-source", dirpath="qt5", options=[qt_version, platform.system()] + modules, build_fn=download_source)
+    return
 
     qt_options = [
         "-confirm-license",
