@@ -63,11 +63,12 @@ def main():
     if platform.system() == "Darwin":
         # cibuildwheel's python copy on mac os x sometimes fails with this error:
         # [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1076)
-        urlretrieve(
-            "https://curl.haxx.se/ca/cacert.pem",
-            os.environ["TRAVIS_BUILD_DIR"] + "/cacert.pem",
-        )
-        os.environ["SSL_CERT_FILE"] = os.environ["TRAVIS_BUILD_DIR"] + "/cacert.pem"
+        # urlretrieve(
+        #     "https://curl.haxx.se/ca/cacert.pem",
+        #     os.environ["TRAVIS_BUILD_DIR"] + "/cacert.pem",
+        # )
+        # os.environ["SSL_CERT_FILE"] = os.environ["TRAVIS_BUILD_DIR"] + "/cacert.pem"
+        pass
     elif platform.system() == "Linux":
         if "TRAVIS_TAG" in os.environ:
             # pass TRAVIS_TAG to the container so that it can build wheels with the correct version number
