@@ -23,6 +23,11 @@ jobs:
           path: cache
           key: ${{ runner.os }}-dependencies-v4
 
+      - name: Cache Found
+        run: echo "cache found $CACHE_FOUND"
+        env:
+          CACHE_FOUND: "${{ steps.cache-primes.outputs.cache-hit }}"
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
