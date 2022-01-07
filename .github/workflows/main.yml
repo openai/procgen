@@ -36,16 +36,14 @@ jobs:
         run: ls cache
       - name: Pwd
         run: pwd
-      - name: Build Qt
-        run: pip install -r procgen-build/requirements.txt && pip install -e procgen-build && python -u -m procgen_build.build_qt --output-dir /tmp/qt5
+      - name: Build
+        run: python -u -m procgen_build.build_package
       - name: Check cache
         run: ls cache
       - name: Check cache
         run: ls /cache
       # - name: Test
       #   run: python -u -m procgen_build.dev_test
-      # - name: Build
-      #   run: python -u -m procgen_build.build_package
 
 
 

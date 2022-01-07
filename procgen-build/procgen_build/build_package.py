@@ -83,7 +83,10 @@ def main():
         init_vsvars()
 
     run("pip install cibuildwheel==1.4.1")
-    run("cibuildwheel --output-dir wheelhouse")
+    try:
+        run("cibuildwheel --output-dir wheelhouse")
+    except Exception as e:
+        print(e)
 
     # if have_credentials:
     #     print("upload wheels", platform.system())
