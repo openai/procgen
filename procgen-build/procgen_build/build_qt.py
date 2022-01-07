@@ -117,8 +117,13 @@ def build_qt(output_dir):
             # QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
             # find all qmake.conf files
             print("find qmake.conf files")
-            run("find . -iname qmake.conf")
-            pass
+            run("find ../qt5 -iname qmake.conf")
+            for root, dirs, files in os.walk('../qt5'):
+                for file in files:
+                    path = os.path.join(root, file)
+                    if file == "qmake.conf":
+                        print(f"qmake: {path}")
+                        print(open(path).read())
         if platform.system() == "Windows":
             qt_configure = "..\\qt5\\configure"
         else:
