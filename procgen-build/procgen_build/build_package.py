@@ -12,39 +12,6 @@ from .common import run
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-# https://stackoverflow.com/a/50135504
-def init_vsvars():
-    print("Initializing environment for Visual Studio")
-
-    vcvars_path = "C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvars64.bat"
-
-    env_bat_file_path = "setup_build_environment_temp.bat"
-    env_txt_file_path = "build_environment_temp.txt"
-    with open(env_bat_file_path, "w") as env_bat_file:
-        env_bat_file.write('call "%s"\n' % vcvars_path)
-        env_bat_file.write("set > %s\n" % env_txt_file_path)
-
-    os.system(env_bat_file_path)
-    with open(env_txt_file_path, "r") as env_txt_file:
-        lines = env_txt_file.read().splitlines()
-
-    os.remove(env_bat_file_path)
-    os.remove(env_txt_file_path)
-    for line in lines:
-        if "=" not in line:
-            print(f"invalid line {repr(line)}")
-            continue
-        k, v = line.split("=", 1)
-        os.environ[k] = v
-
-
-def get_var(pattern):
-    for key, value in os.environ:
-        if fnmatch.fnmatch(key, pattern):
-            return os.environ[key]
-    return None
-
-
 def main():
     os.environ.update(
         {
@@ -80,9 +47,6 @@ def main():
             os.environ["CIBW_ENVIRONMENT"]
             + f" CACHE_DIR=/host{os.getcwd()}/cache"
         )
-    elif platform.system() == "Windows":
-        # init_vsvars()
-        pass
 
     run("pip install cibuildwheel==1.4.1")
     run("cibuildwheel --output-dir wheelhouse")

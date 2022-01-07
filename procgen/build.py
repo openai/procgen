@@ -71,7 +71,7 @@ def _attempt_configure(build_type, package):
 
     generator = "Unix Makefiles"
     if platform.system() == "Windows":
-        generator = "Visual Studio 15 2017 Win64"
+        generator = "Visual Studio 16 2019 Win64"
     configure_cmd = [
         "cmake",
         "-G",
