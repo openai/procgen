@@ -3,8 +3,7 @@ from urllib.request import urlretrieve
 import os
 import subprocess as sp
 import fnmatch
-
-# import blobfile as bf
+import shutil
 
 from .common import run
 
@@ -27,16 +26,7 @@ def main():
             # "CIBW_BUILD_VERBOSITY": "3",
         }
     )
-    if platform.system() == "Darwin":
-        # cibuildwheel's python copy on mac os x sometimes fails with this error:
-        # [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1076)
-        # urlretrieve(
-        #     "https://curl.haxx.se/ca/cacert.pem",
-        #     os.environ["TRAVIS_BUILD_DIR"] + "/cacert.pem",
-        # )
-        # os.environ["SSL_CERT_FILE"] = os.environ["TRAVIS_BUILD_DIR"] + "/cacert.pem"
-        pass
-    elif platform.system() == "Linux":
+    if platform.system() == "Linux":
         if "TRAVIS_TAG" in os.environ:
             # pass TRAVIS_TAG to the container so that it can build wheels with the correct version number
             os.environ["CIBW_ENVIRONMENT"] = (
@@ -51,15 +41,15 @@ def main():
     run("pip install cibuildwheel==1.4.1")
     run("cibuildwheel --output-dir wheelhouse")
 
-    # if have_credentials:
-    #     print("upload wheels", platform.system())
-    #     input_dir = "wheelhouse"
-    #     output_dir = f"gs://{GCS_BUCKET}/builds/"
-    #     for filename in bf.listdir(input_dir):
-    #         src = bf.join(input_dir, filename)
-    #         dst = bf.join(output_dir, filename)
-    #         print(src, "=>", dst)
-    #         bf.copy(src, dst, overwrite=True)
+    if platform.system() == "Linux":
+        # copy the wheels outside of the docker container
+        input_dir = "wheelhouse"
+        output_dir = os.path.join("/host" + os.getcwd(), "wheelhouse")
+        for filename in os.listdir(input_dir):
+            src = os.path.join(input_dir, filename)
+            dst = os.path.join(output_dir, filename)
+            print(src, "=>", dst)
+            shutil.copyfile(src, dst)
 
 
 if __name__ == "__main__":
