@@ -3,8 +3,8 @@ name: ci
 on: [push]
 
 jobs:
-  builds:
-    name: ${{ matrix.python-version }}, ${{ matrix.os }}
+  build:
+    name: build ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -39,8 +39,8 @@ jobs:
       - name: Build
         run: python -u -m procgen_build.build_package
 
-  tests:
-    name: ${{ matrix.python-version }}, ${{ matrix.os }}
+  dev:
+    name: dev ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
