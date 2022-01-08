@@ -73,7 +73,7 @@ def _attempt_configure(build_type, package):
     extra_configure_options = []
     if platform.system() == "Windows":
         generator = "Visual Studio 16 2019"
-        extra_configure_options.extend(["-A", "Win64"])
+        extra_configure_options.extend(["-A", "x64"])
     configure_cmd = [
         "cmake",
         "-G",
