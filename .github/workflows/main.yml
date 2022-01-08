@@ -39,10 +39,11 @@ jobs:
       - name: Build
         run: python -u -m procgen_build.build_package
 
-      - uses: actions/upload-artifact@v2
-      with:
-        name: wheels
-        path: wheelhouse/*
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: wheelhouse/*
 
   dev:
     name: dev ${{ matrix.os }}
