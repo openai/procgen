@@ -45,6 +45,8 @@ def main():
         # copy the wheels outside of the docker container
         input_dir = "wheelhouse"
         output_dir = os.path.join("/host" + os.getcwd(), "wheelhouse")
+        os.makedirs(output_dir, exist_ok=True)
+        
         for filename in os.listdir(input_dir):
             src = os.path.join(input_dir, filename)
             dst = os.path.join(output_dir, filename)
