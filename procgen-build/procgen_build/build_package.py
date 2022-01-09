@@ -14,7 +14,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 def main():
     os.environ.update(
         {
-            "CIBW_BUILD": "cp36-macosx_x86_64 cp37-macosx_x86_64 cp38-macosx_x86_64 cp36-manylinux_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64 cp36-win_amd64 cp37-win_amd64 cp38-win_amd64",
+            "CIBW_BUILD": "cp36-macosx_x86_64 cp37-macosx_x86_64 cp38-macosx_x86_64 cp39-macosx_x86_64 cp310-macosx_x86_64 cp36-manylinux_x86_64 cp37-manylinux_x86_64 cp38-manylinux_x86_64 cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp36-win_amd64 cp37-win_amd64 cp38-win_amd64 cp39-win_amd64 cp310-win_amd64",
             "CIBW_BEFORE_BUILD": "pip install -r procgen-build/requirements.txt && pip install -e procgen-build && python -u -m procgen_build.build_qt --output-dir /tmp/qt5",
             "CIBW_TEST_EXTRAS": "test",
             "CIBW_BEFORE_TEST": "pip install -r procgen-build/requirements.txt",
