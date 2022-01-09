@@ -41,18 +41,6 @@ def main():
     run("pip install cibuildwheel==1.4.1")
     run("cibuildwheel --output-dir wheelhouse")
 
-    if platform.system() == "Linux":
-        # copy the wheels outside of the docker container
-        input_dir = "wheelhouse"
-        output_dir = os.path.join("/host" + os.getcwd(), "wheelhouse")
-        os.makedirs(output_dir, exist_ok=True)
-        
-        for filename in os.listdir(input_dir):
-            src = os.path.join(input_dir, filename)
-            dst = os.path.join(output_dir, filename)
-            print(src, "=>", dst)
-            shutil.copyfile(src, dst)
-
 
 if __name__ == "__main__":
     main()
