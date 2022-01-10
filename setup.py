@@ -1,6 +1,5 @@
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
-import subprocess
 import os
 import sys
 import glob
@@ -33,10 +32,9 @@ class custom_build_ext(build_ext):
             print("skipping inplace build, extension will be built on demand")
             return
         sys.path.append(PACKAGE_ROOT)
-        import build
-        print("build path", build.__file__)
+        import builder
 
-        lib_dir = build.build(package=True)
+        lib_dir = builder.build(package=True)
 
         # move into the build_lib directory so that the shared library
         # can be included in the package
