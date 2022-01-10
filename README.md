@@ -26,9 +26,10 @@ Supported platforms:
 
 Supported Pythons:
 
-- 3.6 64-bit
 - 3.7 64-bit
 - 3.8 64-bit
+- 3.9 64-bit
+- 3.10 64-bit
 
 Supported CPUs:
 
@@ -40,7 +41,7 @@ First make sure you have a supported version of python:
 
 ```
 # run these commands to check for the correct python version
-python -c "import sys; assert (3,6,0) <= sys.version_info <= (3,9,0), 'python is incorrect version'; print('ok')"
+python -c "import sys; assert (3,7,0) <= sys.version_info <= (3,10,0), 'python is incorrect version'; print('ok')"
 python -c "import platform; assert platform.architecture()[0] == '64bit', 'python is not 64-bit'; print('ok')"
 ```
 
