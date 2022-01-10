@@ -40,7 +40,7 @@ def main():
     else:
         os.environ["CACHE_DIR"] = os.path.join(os.getcwd(), "cache")
 
-    run("pip install cibuildwheel==1.12.0")
+    run("pip install cibuildwheel==2.3.1")
     run("cibuildwheel --output-dir wheelhouse")
 
 
