@@ -34,7 +34,7 @@ class custom_build_ext(build_ext):
             return
         sys.path.append(PACKAGE_ROOT)
         import build
-        print("build path", build.__path__)
+        print("build path", build.__file__)
 
         lib_dir = build.build(package=True)
 
