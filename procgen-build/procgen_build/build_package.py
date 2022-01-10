@@ -37,6 +37,8 @@ def main():
             os.environ["CIBW_ENVIRONMENT"]
             + f" CACHE_DIR=/host{os.getcwd()}/cache"
         )
+    else:
+        os.environ["CACHE_DIR"] = os.path.join(os.getcwd(), "cache")
 
     run("pip install cibuildwheel==1.12.0")
     run("cibuildwheel --output-dir wheelhouse")

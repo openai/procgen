@@ -21,7 +21,7 @@ def cache_folder(name, dirpath, options, build_fn):
         return
     
     options_hash = hashlib.md5("|".join(options).encode("utf8")).hexdigest()
-    cache_dir = os.environ.get("CACHE_DIR", "cache")
+    cache_dir = os.environ["CACHE_DIR"]
     cache_path = os.path.join(cache_dir, f"{name}-{options_hash}.tar")
     if os.path.exists(cache_path):
         print(f"downloading cache for {name}: {cache_path}")
