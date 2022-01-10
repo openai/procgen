@@ -38,7 +38,7 @@ def main():
             + f" CACHE_DIR=/host{os.getcwd()}/cache"
         )
 
-    run("pip install cibuildwheel==1.4.1")
+    run("pip install cibuildwheel==1.12.0")
     run("cibuildwheel --output-dir wheelhouse")
 
 

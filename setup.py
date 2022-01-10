@@ -11,25 +11,6 @@ README = open(os.path.join(SCRIPT_DIR, "README.md"), "rb").read().decode("utf8")
 
 # dynamically determine version number based on git commit
 version = open(os.path.join(PACKAGE_ROOT, "version.txt"), "r").read().strip()
-sha = "unknown"
-
-try:
-    sha = (
-        subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=SCRIPT_DIR)
-        .decode("ascii")
-        .strip()
-    )
-except Exception:
-    pass
-
-if os.environ.get("TRAVIS_TAG", "") != "":
-    tag = os.environ["TRAVIS_TAG"]
-    assert tag == version, "mismatch in tag vs version, expected: %s actual: %s" % (
-        tag,
-        version,
-    )
-elif sha != "unknown":
-    version += "+" + sha[:7]
 
 
 # build shared library
