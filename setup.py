@@ -69,7 +69,7 @@ setup(
             *asset_relpaths,
         ]
     },
-    extras_require={"test": ["pytest==5.2.1", "pytest-benchmark==3.2.2"]},
+    extras_require={"test": ["pytest==6.2.5", "pytest-benchmark==3.4.1"]},
     ext_modules=[DummyExtension()],
     cmdclass={"build_ext": custom_build_ext},
 
