@@ -33,15 +33,18 @@ class custom_build_ext(build_ext):
             print("skipping inplace build, extension will be built on demand")
             return
         sys.path.append(PACKAGE_ROOT)
-        import build
+        build_ext.run(self)
+        # import build
 
-        lib_dir = build.build(package=True)
+        # lib_dir = build.build(package=True)
+        
+
         # move into the build_lib directory so that the shared library
         # can be included in the package
         # we will also check for this file at runtime to avoid doing
         # the on-demand build
         for filename in ["libenv.so", "libenv.dylib", "env.dll"]:
-            src = os.path.join(lib_dir, filename)
+            src = os.path.join(self.build_temp, filename)
             dst = os.path.join(self.build_lib, "procgen", "data", "prebuilt", filename)
             if os.path.exists(src):
                 os.makedirs(os.path.dirname(dst), exist_ok=True)
