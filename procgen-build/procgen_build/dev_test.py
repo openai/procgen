@@ -20,9 +20,9 @@ def main():
         apt_install(["mesa-common-dev"])
 
     installer_urls = {
-        "Linux": "https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh",
-        "Darwin": "https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-MacOSX-x86_64.sh",
-        "Windows": "https://repo.anaconda.com/miniconda/Miniconda3-4.7.12.1-Windows-x86_64.exe",
+        "Linux": "https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh",
+        "Darwin": "https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-MacOSX-x86_64.sh",
+        "Windows": "https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Windows-x86_64.exe",
     }
     installer_url = installer_urls[platform.system()]
     urlretrieve(

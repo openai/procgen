@@ -3,15 +3,14 @@ import multiprocessing as mp
 import os
 import time
 import tarfile
+import os
 import argparse
 import threading
 import platform
 import shutil
 import hashlib
 
-import blobfile as bf
-
-from .common import run, GCS_BUCKET
+from .common import run
 
 BUILD_VERSION = 11
 
@@ -22,17 +21,12 @@ def cache_folder(name, dirpath, options, build_fn):
         return
     
     options_hash = hashlib.md5("|".join(options).encode("utf8")).hexdigest()
-    cache_path = bf.join(f"gs://{GCS_BUCKET}", "cache", f"{name}-{options_hash}.tar")
-    if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
-        # we don't have any credentials to do the caching, always build in this case
-        print(f"building without cache for {name}")
-        start = time.time()
-        build_fn()
-        print(f"build elapsed {time.time() - start}")
-    elif bf.exists(cache_path):
+    cache_dir = os.environ["CACHE_DIR"]
+    cache_path = os.path.join(cache_dir, f"{name}-{options_hash}.tar")
+    if os.path.exists(cache_path):
         print(f"downloading cache for {name}: {cache_path}")
         start = time.time()
-        with bf.BlobFile(cache_path, "rb") as f:
+        with open(cache_path, "rb") as f:
             with tarfile.open(fileobj=f, mode="r") as tf:
                 tf.extractall()
         print(f"download elapsed {time.time() - start}")
@@ -43,8 +37,9 @@ def cache_folder(name, dirpath, options, build_fn):
         print(f"cache build elapsed {time.time() - start}")
         print(f"uploading cache for {name}")
         start = time.time()
-        if not bf.exists(cache_path):
-            with bf.BlobFile(cache_path, "wb") as f:
+        if not os.path.exists(cache_path):
+            os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+            with open(cache_path, "wb") as f:
                 with tarfile.open(fileobj=f, mode="w") as tf:
                     tf.add(dirpath)
         print(f"upload elapsed {time.time() - start}")
@@ -118,6 +113,36 @@ def build_qt(output_dir):
     def compile_qt():
         os.makedirs("build")
         os.chdir("build")
+        if platform.system() == "Darwin":
+            # ../qt5/qtbase/mkspecs/macx-clang/qmake.conf
+            # ../qt5/qtbase/mkspecs/macx-xcode/qmake.conf
+            # 
+            # find all qmake.conf files
+            print("find qmake.conf files")
+            run("find ../qt5 -iname qmake.conf")
+            for root, dirs, files in os.walk('../qt5'):
+                for file in files:
+                    path = os.path.join(root, file)
+                    if file == "qmake.conf":
+                        print(f"qmake: {path}")
+                        print(open(path).read())
+            path = "../qt5/qtbase/mkspecs/macx-clang/qmake.conf"
+            contents = """\
+QMAKE_LIBS_X11 = -lX11 -lXext -lm
+QMAKE_LIBDIR_X11 = /opt/X11/lib
+QMAKE_INCDIR_X11 = /opt/X11/include
+
+include(../common/macx.conf)
+include(../common/gcc-base-mac.conf)
+include(../common/clang.conf)
+include(../common/clang-mac.conf)
+
+QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.13
+
+load(qt_config)
+"""
+            with open(path, "w") as f:
+                f.write(contents)
         if platform.system() == "Windows":
             qt_configure = "..\\qt5\\configure"
         else:

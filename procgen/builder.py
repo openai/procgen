@@ -70,12 +70,15 @@ def _attempt_configure(build_type, package):
             cmake_prefix_paths.insert(0, conda_cmake_path)
 
     generator = "Unix Makefiles"
+    extra_configure_options = []
     if platform.system() == "Windows":
-        generator = "Visual Studio 15 2017 Win64"
+        generator = "Visual Studio 16 2019"
+        extra_configure_options.extend(["-A", "x64"])
     configure_cmd = [
         "cmake",
         "-G",
         generator,
+        *extra_configure_options,
         "-DCMAKE_PREFIX_PATH=" + ";".join(cmake_prefix_paths),
         f"-DLIBENV_DIR={gym3.libenv.get_header_dir()}",
         "../..",

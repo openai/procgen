@@ -1,6 +1,5 @@
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
-import subprocess
 import os
 import sys
 import glob
@@ -11,25 +10,6 @@ README = open(os.path.join(SCRIPT_DIR, "README.md"), "rb").read().decode("utf8")
 
 # dynamically determine version number based on git commit
 version = open(os.path.join(PACKAGE_ROOT, "version.txt"), "r").read().strip()
-sha = "unknown"
-
-try:
-    sha = (
-        subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=SCRIPT_DIR)
-        .decode("ascii")
-        .strip()
-    )
-except Exception:
-    pass
-
-if os.environ.get("TRAVIS_TAG", "") != "":
-    tag = os.environ["TRAVIS_TAG"]
-    assert tag == version, "mismatch in tag vs version, expected: %s actual: %s" % (
-        tag,
-        version,
-    )
-elif sha != "unknown":
-    version += "+" + sha[:7]
 
 
 # build shared library
@@ -52,9 +32,10 @@ class custom_build_ext(build_ext):
             print("skipping inplace build, extension will be built on demand")
             return
         sys.path.append(PACKAGE_ROOT)
-        import build
+        import builder
 
-        lib_dir = build.build(package=True)
+        lib_dir = builder.build(package=True)
+
         # move into the build_lib directory so that the shared library
         # can be included in the package
         # we will also check for this file at runtime to avoid doing
@@ -88,7 +69,7 @@ setup(
             *asset_relpaths,
         ]
     },
-    extras_require={"test": ["pytest==5.2.1", "pytest-benchmark==3.2.2"]},
+    extras_require={"test": ["pytest==6.2.5", "pytest-benchmark==3.4.1"]},
     ext_modules=[DummyExtension()],
     cmdclass={"build_ext": custom_build_ext},
 

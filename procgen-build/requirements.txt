@@ -1,0 +1,2 @@
+imageio==2.9.0  # the pillow version we want to use requires an older imageio version
+pillow==8.4.0  # this is required by gym3, newer versions fail to install on linux cibuildwheel with a missing dependency error

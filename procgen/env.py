@@ -5,7 +5,7 @@ from typing import Sequence, Optional, List
 import gym3
 from gym3.libenv import CEnv
 import numpy as np
-from .build import build
+from .builder import build
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
