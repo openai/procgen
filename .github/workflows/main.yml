@@ -45,6 +45,9 @@ jobs:
           name: wheels
           path: wheelhouse/*
 
+      - name: Move packages
+        run: mv wheelhouse dist
+
       - name: Publish distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@master
         with:
