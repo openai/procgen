@@ -81,10 +81,10 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          path: dist
+          path: artifacts
           
       - name: Move files so the next action can find them
-        run: mv dist/wheels/* dist/
+        run: mkdir dist && mv artifacts/wheels/* dist/
 
       - name: Publish distribution 📦 to Test PyPI
         uses: pypa/gh-action-pypi-publish@master
