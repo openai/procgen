@@ -86,11 +86,14 @@ jobs:
       - name: Move files so the next action can find them
         run: mkdir dist && mv artifacts/wheels/* dist/
 
-      - name: Publish distribution 📦 to Test PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+      # this doesn't work because the development versions use PEP 440 local version identifiers
+      # the fix would be to instead use .dev<number> but it's not obvious how to make that work
+      # well especially with branches
+      # - name: Publish distribution 📦 to Test PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      #     repository_url: https://test.pypi.org/legacy/
           
       - name: Publish distribution 📦 to PyPI
         if: startsWith(github.ref, 'refs/tags')
