@@ -25,7 +25,6 @@ def determine_version():
 
     if "GITHUB_REF" in os.environ:
         ref = os.environ["GITHUB_REF"]
-        print(f"ref={ref}")
         parts = ref.split("/")
         assert parts[0] == "refs"
         if parts[1] == "tags":
