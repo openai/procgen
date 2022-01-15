@@ -10,29 +10,37 @@ PACKAGE_ROOT = os.path.join(SCRIPT_DIR, "procgen")
 README = open(os.path.join(SCRIPT_DIR, "README.md"), "rb").read().decode("utf8")
 
 # dynamically determine version number based on git commit
-version = open(os.path.join(PACKAGE_ROOT, "version.txt"), "r").read().strip()
-sha = "unknown"
+def determine_version():
+    version = open(os.path.join(PACKAGE_ROOT, "version.txt"), "r").read().strip()
+    sha = "unknown"
 
-try:
-    sha = (
-        subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=SCRIPT_DIR)
-        .decode("ascii")
-        .strip()
-    )
-except Exception:
-    pass
+    try:
+        sha = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=SCRIPT_DIR)
+            .decode("ascii")
+            .strip()
+        )
+    except Exception:
+        pass
 
-if "GITHUB_REF" in os.environ:
-    ref = os.environ["GITHUB_REF"]
-    tag = ref.split("/")[-1]
-    print(f"ref={ref} tag={tag}")
-    assert tag == version, "mismatch in tag vs version, expected: %s actual: %s" % (
-        tag,
-        version,
-    )
-elif sha != "unknown":
-    version += "+" + sha[:7]
+    if "GITHUB_REF" in os.environ:
+        ref = os.environ["GITHUB_REF"]
+        print(f"ref={ref}")
+        parts = ref.split("/")
+        assert parts[0] == "refs"
+        if parts[1] == "tags":
+            tag = parts[2]
+            assert tag == version, "mismatch in tag vs version, expected: %s actual: %s" % (
+                tag,
+                version,
+            )
+            return version
+    elif sha == "unknown":
+        return version
+    else:
+        return version + "+" + sha[:7]
 
+version = determine_version()
 
 # build shared library
 class DummyExtension(Extension):
