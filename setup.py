@@ -35,7 +35,8 @@ def determine_version():
                 version,
             )
             return version
-    elif sha == "unknown":
+    
+    if sha == "unknown":
         return version
     else:
         return version + "+" + sha[:7]
