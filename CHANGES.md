@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.7
+
+* Custom `ToBaselinesVecEnv` to support `VecVideoRecorder` from @bragajj: https://github.com/openai/procgen/pull/62
+
 ## 0.10.6
 
 * Change supported pythons to be 3.7-3.10
