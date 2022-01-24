@@ -249,7 +249,7 @@ class ProcgenGym3Env(BaseProcgenEnv):
 class ToBaselinesVecEnv(gym3.ToBaselinesVecEnv):
     metadata = {
         'render.modes': ['human', 'rgb_array'],
-        'video.frames_per_second' : 24
+        'video.frames_per_second' : 15
     }
     def render(self, mode="human"):
         info = self.env.get_info()[0]
