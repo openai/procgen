@@ -22,7 +22,7 @@ class ProcgenInteractive(Interactive):
         super()._update(dt, keys_clicked, keys_pressed)
 
 
-def make_interactive(vision, record_dir, **kwargs):
+def make_interactive(vision, record_dir, synchronous, **kwargs):
     info_key = None
     ob_key = None
     if vision == "human":
@@ -37,12 +37,25 @@ def make_interactive(vision, record_dir, **kwargs):
             env=env, directory=record_dir, ob_key=ob_key, info_key=info_key
         )
     h, w, _ = env.ob_space["rgb"].shape
+
+    if synchronous:
+        def keys_to_act(keys):
+            if len(keys) == 0:
+                return None
+            else:
+                return env.callmethod("keys_to_act", [keys])[0]
+    else:
+        def keys_to_act(keys):
+            return env.callmethod("keys_to_act", [keys])[0]
+
     return ProcgenInteractive(
         env,
         ob_key=ob_key,
         info_key=info_key,
         width=w * 12,
         height=h * 12,
+        synchronous=synchronous,
+        keys_to_act=keys_to_act,
     )
 
 
@@ -51,6 +64,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Interactive version of Procgen allowing you to play the games"
     )
+    parser.add_argument("--synchronous", action="store_true", help="Play the game by single stepping each frame")
     parser.add_argument(
         "--vision",
         default="human",
@@ -127,7 +141,7 @@ def main():
         kwargs["start_level"] = args.level_seed
         kwargs["num_levels"] = 1
     ia = make_interactive(
-        args.vision, record_dir=args.record_dir, env_name=args.env_name, **kwargs
+        args.vision, record_dir=args.record_dir, env_name=args.env_name, synchronous=args.synchronous, **kwargs
     )
     ia.run()
 

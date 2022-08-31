@@ -12,9 +12,9 @@ Random number generator with consistent behavior across platforms
 class RandGen {
   public:
     std::mt19937 stdgen;
-    int randint(int low, int high);
-    int randn(int high);
-    float rand01();
+    int randint(int low, int high);  // [low, high)
+    int randn(int high); // [0, high)
+    float rand01();  // [0, 1)
     float randrange(float low, float high);
     int randint();
     bool randbool();

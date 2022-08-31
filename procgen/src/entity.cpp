@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+std::map<std::string, std::function<std::shared_ptr<Entity>()>> *globalEntityRegistry = nullptr;
+
 Entity::Entity() {
 }
 
@@ -85,6 +87,10 @@ void Entity::face_direction(float dx, float dy, float rotation_offset) {
     if (dx != 0 || dy != 0) {
         rotation = -1 * atan2(dy, dx) + rotation_offset;
     }
+}
+
+std::string Entity::get_type_name() {
+    return "e";
 }
 
 void Entity::serialize(WriteBuffer *b) {

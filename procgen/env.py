@@ -28,6 +28,10 @@ ENV_NAMES = [
     "ninja",
     "plunder",
     "starpilot",
+    "gemjourney",
+    "caterpillar",
+    "hovercraft",
+    "safezone",
 ]
 
 EXPLORATION_LEVEL_SEEDS = {
@@ -262,4 +266,7 @@ class ToBaselinesVecEnv(gym3.ToBaselinesVecEnv):
 
 
 def ProcgenEnv(num_envs, env_name, **kwargs):
+    """
+    Baselines VecEnv interface for Procgen
+    """
     return ToBaselinesVecEnv(ProcgenGym3Env(num=num_envs, env_name=env_name, **kwargs))

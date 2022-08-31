@@ -563,6 +563,12 @@ std::shared_ptr<Entity> BasicAbstractGame::spawn_entity(float r, int type, float
     return spawn_entity_rxy(r, r, type, x, y, w, h, check_collisions);
 }
 
+std::shared_ptr<Entity> BasicAbstractGame::add_entity(float x, float y, float r, int type) {
+    std::shared_ptr<Entity> ent(new Entity(x, y, 0, 0, r, r, type));
+    entities.push_back(ent);
+    return ent;
+}
+
 std::shared_ptr<Entity> BasicAbstractGame::add_entity(float x, float y, float vx, float vy, float r, int type) {
     std::shared_ptr<Entity> ent(new Entity(x, y, vx, vy, r, r, type));
     entities.push_back(ent);
@@ -1153,6 +1159,7 @@ void BasicAbstractGame::write_entities(WriteBuffer *b, std::vector<std::shared_p
     b->write_int(ents.size());
 
     for (size_t i = 0; i < ents.size(); i++) {
+        b->write_string(ents[i]->get_type_name());
         ents[i]->serialize(b);
     }
 }
@@ -1160,7 +1167,8 @@ void BasicAbstractGame::write_entities(WriteBuffer *b, std::vector<std::shared_p
 void BasicAbstractGame::read_entities(ReadBuffer *b, std::vector<std::shared_ptr<Entity>> &ents) {
     ents.resize(b->read_int());
     for (size_t i = 0; i < ents.size(); i++) {
-        auto e = std::make_shared<Entity>();
+        auto type_name = b->read_string();
+        auto e = globalEntityRegistry->at(type_name)();
         e->deserialize(b);
         ents[i] = e;
     }

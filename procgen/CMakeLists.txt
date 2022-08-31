@@ -64,6 +64,10 @@ add_library(env
   src/games/chaser.cpp
   src/games/plunder.cpp
   src/games/starpilot.cpp
+  src/games/gemjourney.cpp
+  src/games/caterpillar.cpp
+  src/games/hovercraft.cpp
+  src/games/safezone.cpp
   src/mazegen.cpp
   src/randgen.cpp
   src/roomgen.cpp

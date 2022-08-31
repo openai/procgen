@@ -3,6 +3,8 @@
 #include "object-ids.h"
 #include "buffer.h"
 #include <memory>
+#include <map>
+#include <functional>
 
 class Entity {
   public:
@@ -50,10 +52,37 @@ class Entity {
     Entity();
     Entity(float _x, float _y, float _dx, float _dy, float _rx, float _ry, int _type);
     Entity(float _x, float _y, float _dx, float _dy, float _r, int _type);
+    virtual ~Entity() {};
 
     void step();
     bool should_erase();
     void face_direction(float dx, float dy, float rotation_offset = 0);
-    void serialize(WriteBuffer *b);
-    void deserialize(ReadBuffer *b);
+    virtual std::string get_type_name();
+    virtual void serialize(WriteBuffer *b);
+    virtual void deserialize(ReadBuffer *b);
 };
+
+// entity registration system
+// for game-specific entity types, in order to deserialize them correctly we need to be able
+// to construct an empty entity of the correct type
+// this registry makes that possible without moving all the entity types to a single file
+#define REGISTER_ENTITY(cls)                                         \
+    static auto UNUSED_FUNCTION(_registration_entity_ ## cls) = registerEntity([] { \
+        return std::make_shared<cls>();                                  \
+    })
+
+extern std::map<std::string, std::function<std::shared_ptr<Entity>()>> *globalEntityRegistry;
+
+template <typename Func>
+int registerEntity(Func fn) {
+    if (globalEntityRegistry == nullptr) {
+        // because global initialization order is undefined in C++, supposedly
+        // we have to set this here
+        globalEntityRegistry = new std::map<std::string, std::function<std::shared_ptr<Entity>()>>();
+    }
+    auto e = fn();
+    (*globalEntityRegistry)[e->get_type_name()] = fn;
+    return 0;
+}
+
+REGISTER_ENTITY(Entity);

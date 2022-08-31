@@ -26,7 +26,12 @@ class Grid {
         w = width;
         h = height;
         data.clear();
-        data.resize(width * height);
+        data.resize(w * h);
+    }
+
+    void clear() {
+        data.clear();
+        data.resize(w * h);
     }
 
     bool contains(int x, int y) const {

@@ -6,9 +6,12 @@ std::string global_resource_root;
 std::vector<std::shared_ptr<QImage>> topdown_backgrounds;
 std::vector<std::shared_ptr<QImage>> topdown_simple_backgrounds;
 std::vector<std::shared_ptr<QImage>> platform_backgrounds;
+std::vector<std::shared_ptr<QImage>> platform_easy_backgrounds;
 std::vector<std::shared_ptr<QImage>> space_backgrounds;
 std::vector<std::shared_ptr<QImage>> water_backgrounds;
 std::vector<std::shared_ptr<QImage>> water_surface_backgrounds;
+std::vector<std::shared_ptr<QImage>> caterpillar_backgrounds;
+std::vector<std::shared_ptr<QImage>> gemjourney_backgrounds;
 
 std::map<std::string, std::shared_ptr<QImage>> sprites;
 
@@ -709,6 +712,7 @@ void images_load() {
         "misc_assets/lockRed2.png",
         "misc_assets/car_yellow_5.png",
         "misc_assets/explosion5.png",
+        "misc_assets/transparent.png",
         "platformer/playerBlue_dead.png",
         "platformer/playerBlue_roll.png",
         "platformer/playerRed_walk4.png",
@@ -808,6 +812,57 @@ void images_load() {
         "platformer/playerRed_switch2.png",
         "platformer/playerRed_swim1.png",
         "platformer/playerGrey_duck.png",
+
+        "caterpillar/enemy-medium-0-0.png",
+        "caterpillar/enemy-medium-0-1.png",
+        "caterpillar/enemy-small-0-0.png",
+        "caterpillar/enemy-small-0-1.png",
+        "caterpillar/laser-bolts-1-0.png",
+        "caterpillar/laser-bolts-1-1.png",
+        "caterpillar/power-up-0-0.png",
+        "caterpillar/power-up-0-1.png",
+        "caterpillar/power-up-1-0.png",
+        "caterpillar/power-up-1-1.png",
+        "caterpillar/ship-0-2.png",
+        "caterpillar/ship-1-2.png",
+
+        "gemjourney/pig.png",
+        "gemjourney/chick.png",
+        "gemjourney/chicken.png",
+        "gemjourney/house.png",
+        "gemjourney/gem-1.png",
+        "gemjourney/gem-2.png",
+        "gemjourney/gem-3.png",
+        "gemjourney/gem-4.png",
+        "gemjourney/gem-5.png",
+        "gemjourney/croc.png",
+        "gemjourney/fox-run-1.png",
+        "gemjourney/fox-run-2.png",
+        "gemjourney/fox-run-3.png",
+        "gemjourney/fox-run-4.png",
+        "gemjourney/fox-run-5.png",
+        "gemjourney/fox-run-6.png",
+        "gemjourney/worm-1.png",
+        "gemjourney/worm-2.png",
+
+        "hovercraft/shipBeige_manned.png",
+        "hovercraft/shipBlue_manned.png",
+        "hovercraft/shipGreen_manned.png",
+        "hovercraft/shipPink_manned.png",
+        "hovercraft/shipYellow_manned.png",
+        "hovercraft/tilePink_24.png",
+        "hovercraft/blade_1.png",
+        "hovercraft/blade_2.png",
+        "hovercraft/blade_3.png",
+
+        "safezone/spaceBuilding_011.png",
+        "safezone/tileGreen_21.png",
+        "safezone/fire1.png",
+        "safezone/fire2.png",
+        "safezone/fire3.png",
+        "safezone/fire4.png",
+        "safezone/fire5.png",
+        "safezone/fire6.png",
     };
 
     for (const auto& sprite_path : sprite_paths) {
@@ -817,9 +872,12 @@ void images_load() {
     auto group_to_vector = std::map<std::string, std::vector<std::shared_ptr<QImage>> *>{
         {"space_backgrounds", &space_backgrounds},
         {"platform_backgrounds", &platform_backgrounds},
+        {"platform_easy_backgrounds", &platform_easy_backgrounds},
         {"topdown_backgrounds", &topdown_backgrounds},
         {"topdown_simple_backgrounds", &topdown_simple_backgrounds},
         {"water_backgrounds", &water_backgrounds},
+        {"caterpillar_backgrounds", &caterpillar_backgrounds},
+        {"gemjourney_backgrounds", &gemjourney_backgrounds},
         {"water_surface_backgrounds", &water_surface_backgrounds},
     };
 
@@ -897,6 +955,21 @@ void images_load() {
             },
         },
         {
+            "platform_easy_backgrounds",
+            {
+                "platform_backgrounds/battleback1.png",
+                "platform_backgrounds/battleback2.png",
+                "platform_backgrounds/battleback3.png",
+                "platform_backgrounds/battleback4.png",
+                "platform_backgrounds/battleback5.png",
+                "platform_backgrounds/battleback6.png",
+                "platform_backgrounds/battleback7.png",
+                "platform_backgrounds/battleback8.png",
+                "platform_backgrounds/battleback9.png",
+                "platform_backgrounds/battleback10.png",
+            },
+        },
+        {
             "topdown_backgrounds",
             {
                 "topdown_backgrounds/floortiles.png",
@@ -936,6 +1009,19 @@ void images_load() {
                 "water_backgrounds/water2.png",
                 "water_backgrounds/water3.png",
                 "water_backgrounds/water4.png",
+            },
+        },
+        {
+            "caterpillar_backgrounds",
+            {
+                "caterpillar/desert-background.png",
+            },
+        },
+        {
+            "gemjourney_backgrounds",
+            {
+                "gemjourney/background1.png",
+                "gemjourney/background2.png",
             },
         },
     };

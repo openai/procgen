@@ -64,6 +64,7 @@ class BasicAbstractGame : public Game {
     std::shared_ptr<Entity> spawn_entity_rxy(float rx, float ry, int type, float x, float y, float w, float h, bool check_collisions = true);
     std::shared_ptr<Entity> spawn_entity(float r, int type, float x, float y, float w, float h, bool check_collisions = true);
     std::shared_ptr<Entity> spawn_entity_at_idx(int idx, float r, int type);
+    std::shared_ptr<Entity> add_entity(float x, float y, float r, int type);
     std::shared_ptr<Entity> add_entity(float x, float y, float vx, float vy, float r, int type);
     std::shared_ptr<Entity> add_entity_rxy(float x, float y, float vx, float vy, float rx, float ry, int type);
     std::shared_ptr<Entity> spawn_child(const std::shared_ptr<Entity> &src, int type, float obj_r, bool match_vel = false);
