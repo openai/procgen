@@ -82,4 +82,16 @@ CC0: https://opengameart.org/content/backgrounds-3
 Sunrise Background
 Author: tgfcoder
 CC0: https://opengameart.org/content/morning-sunrise-background
+
+Spaceship Shooter Environment
+Author: ansimuz
+CCO: https://ansimuz.itch.io/spaceship-shooter-environment
+
+Sunny Land - Pixel Game Art
+Author: ansimuz
+CCO: https://ansimuz.itch.io/sunny-land-pixel-game-art
+
+Sunny Land - Forest
+Author: ansimuz
+CC0: https://ansimuz.itch.io/sunnyland-forest
 ```
