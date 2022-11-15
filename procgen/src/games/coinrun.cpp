@@ -1,5 +1,6 @@
 #include "../basic-abstract-game.h"
 #include "../assetgen.h"
+#include "game_factory.h"
 #include <set>
 #include <queue>
 #include "../mazegen.h"
@@ -521,3 +522,7 @@ class CoinRun : public BasicAbstractGame {
 };
 
 REGISTER_GAME(NAME, CoinRun);
+
+std::shared_ptr<Game> make_coinrun(void) {
+    return std::make_shared<CoinRun>();
+}

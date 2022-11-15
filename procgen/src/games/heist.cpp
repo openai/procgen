@@ -1,5 +1,6 @@
 #include "../basic-abstract-game.h"
 #include "../assetgen.h"
+#include "game_factory.h"
 #include <set>
 #include <queue>
 #include "../mazegen.h"
@@ -224,3 +225,7 @@ class HeistGame : public BasicAbstractGame {
 };
 
 REGISTER_GAME(NAME, HeistGame);
+
+std::shared_ptr<Game> make_heist(void) {
+    return std::make_shared<HeistGame>();
+}

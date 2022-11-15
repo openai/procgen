@@ -1,5 +1,6 @@
 #include "../basic-abstract-game.h"
 #include "../assetgen.h"
+#include "game_factory.h"
 #include <set>
 #include <queue>
 
@@ -278,3 +279,7 @@ class FruitBotGame : public BasicAbstractGame {
 };
 
 REGISTER_GAME(NAME, FruitBotGame);
+
+std::shared_ptr<Game> make_fruitbot(void) {
+    return std::make_shared<FruitBotGame>();
+}

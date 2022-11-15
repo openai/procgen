@@ -1,5 +1,6 @@
 #include "../basic-abstract-game.h"
 #include "../assetgen.h"
+#include "game_factory.h"
 #include <set>
 #include <queue>
 #include "../mazegen.h"
@@ -436,3 +437,7 @@ class Ninja : public BasicAbstractGame {
 };
 
 REGISTER_GAME(NAME, Ninja);
+
+std::shared_ptr<Game> make_ninja(void) {
+    return std::make_shared<Ninja>();
+}

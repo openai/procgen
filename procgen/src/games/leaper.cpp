@@ -1,5 +1,6 @@
 #include "../basic-abstract-game.h"
 #include "../qt-utils.h"
+#include "game_factory.h"
 
 const std::string NAME = "leaper";
 
@@ -302,3 +303,7 @@ class LeaperGame : public BasicAbstractGame {
 };
 
 REGISTER_GAME(NAME, LeaperGame);
+
+std::shared_ptr<Game> make_leaper(void) {
+    return std::make_shared<LeaperGame>();
+}

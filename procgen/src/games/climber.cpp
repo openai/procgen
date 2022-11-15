@@ -1,5 +1,6 @@
 #include "../basic-abstract-game.h"
 #include "../assetgen.h"
+#include "game_factory.h"
 #include <set>
 #include <queue>
 #include "../mazegen.h"
@@ -341,3 +342,7 @@ class Climber : public BasicAbstractGame {
 };
 
 REGISTER_GAME(NAME, Climber);
+
+std::shared_ptr<Game> make_climber(void) {
+    return std::make_shared<Climber>();
+}

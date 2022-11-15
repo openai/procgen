@@ -1,5 +1,6 @@
 #include "../basic-abstract-game.h"
 #include "../assetgen.h"
+#include "game_factory.h"
 #include <set>
 #include <queue>
 
@@ -467,3 +468,7 @@ class DodgeballGame : public BasicAbstractGame {
 };
 
 REGISTER_GAME(NAME, DodgeballGame);
+
+std::shared_ptr<Game> make_dodgeball(void) {
+    return std::make_shared<DodgeballGame>();
+}

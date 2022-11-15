@@ -1,5 +1,6 @@
 #include "../basic-abstract-game.h"
 #include "../assetgen.h"
+#include "game_factory.h"
 #include <set>
 #include <queue>
 
@@ -325,3 +326,7 @@ class MinerGame : public BasicAbstractGame {
 };
 
 REGISTER_GAME(NAME, MinerGame);
+
+std::shared_ptr<Game> make_miner(void) {
+    return std::make_shared<MinerGame>();
+}

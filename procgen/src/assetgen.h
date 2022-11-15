@@ -7,9 +7,9 @@ Generate assets procedurally
 */
 
 #include "randgen.h"
-#include <QColor>
-#include <QImage>
-#include <QRectF>
+#include <QtGui/QColor>
+#include <QtGui/QImage>
+#include <QtCore/QRectF>
 #include <QtGui/QPainter>
 #include <memory>
 
