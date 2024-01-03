@@ -50,6 +50,13 @@ add_library(env
   src/games/dodgeball.cpp
   src/games/bigfish.cpp
   src/games/bossfight.cpp
+  src/games/bossfight_move_100.cpp
+  src/games/bossfight_move_200.cpp
+  src/games/bossfight_move_400.cpp
+  src/games/bossfight_attack_100.cpp
+  src/games/bossfight_attack_200.cpp
+  src/games/bossfight_attack_400.cpp
+  src/games/bossfight_compositional.cpp
   src/games/caveflyer.cpp
   src/games/climber.cpp
   src/games/coinrun_old.cpp

@@ -60,7 +60,7 @@ def main():
     parser.add_argument("--record-dir", help="directory to record movies to")
     parser.add_argument(
         "--distribution-mode",
-        default="hard",
+        default="easy",
         help="which distribution mode to use for the level generation " + default_str,
     )
     parser.add_argument(
