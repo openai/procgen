@@ -13,22 +13,22 @@ jobs:
         os: ["ubuntu-18.04", "macos-10.15", "windows-2019"]
         python-version: ["3.7"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
       # run vcvars on windows
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
 
       # warning: if something is changed so that the cached dependencies are not correct
       # this cache will not notice and the build will be slow, to fix this, increment the
       # version in the key
       - name: Cache Dependencies
         id: cache-dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@8492260343ad570701412c2f464a5877dc76bace # v2
         with:
           path: cache
           key: ${{ runner.os }}-dependencies-v7
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@e9aba2c848f5ebd159c070c61ea2c4e2b122355e # v2
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -40,7 +40,7 @@ jobs:
         run: python -u -m procgen_build.build_package
 
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@82c141cc518b40d92cc801eee768e7aafc9c2fa2 # v2
         with:
           name: wheels
           path: wheelhouse/*
@@ -55,12 +55,12 @@ jobs:
         os: ["ubuntu-18.04", "macos-10.15", "windows-2019"]
         python-version: ["3.7"]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
       # run vcvars on windows
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@e9aba2c848f5ebd159c070c61ea2c4e2b122355e # v2
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -77,9 +77,9 @@ jobs:
     needs: [build]
     runs-on: "ubuntu-18.04"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@cbed621e49e4c01b044d60f6c80ea4ed6328b281 # v2
         with:
           path: artifacts
           
@@ -97,6 +97,6 @@ jobs:
           
       - name: Publish distribution 📦 to PyPI
         if: startsWith(github.ref, 'refs/tags')
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
