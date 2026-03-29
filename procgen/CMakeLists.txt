@@ -16,7 +16,7 @@ if(APPLE)
   # clang defaults to 20 errors, but usually only the first one is useful
   add_compile_options(-ferror-limit=1)
   # only produce errors on mac where development is done
-  add_compile_options(-Werror -Wextra -Wshadow -Wall -Wformat=2 -Wundef -Wvla -Wmissing-include-dirs -Wnon-virtual-dtor -Wno-unused-parameter)
+  add_compile_options(-Werror -Wextra -Wshadow -Wall -Wformat=2 -Wundef -Wvla -Wmissing-include-dirs -Wnon-virtual-dtor -Wno-unused-parameter -Wno-unused-but-set-variable)
 endif()
 
 if(MSVC)
