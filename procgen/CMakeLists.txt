@@ -26,8 +26,14 @@ endif()
 
 if (APPLE OR UNIX)
   if(PROCGEN_PACKAGE)
-    # compile for the minimum spec processor
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -march=ivybridge")
+    # compile for the minimum spec processor (for a portable wheel)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+      # -march=ivybridge is an x86-only microarch and is rejected by arm64 clang;
+      # use the base armv8-a ISA so the wheel stays portable across Apple Silicon / aarch64.
+      set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -march=armv8-a")
+    else()
+      set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -march=ivybridge")
+    endif()
   else()
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -march=native")
   endif()
