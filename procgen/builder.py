@@ -54,7 +54,11 @@ def _attempt_configure(build_type, package):
         cmake_prefix_paths = [os.environ["PROCGEN_CMAKE_PREFIX_PATH"]]
     else:
         # guess some common qt cmake paths, it's unclear why cmake can't find qt without this
-        cmake_prefix_paths = ["/usr/local/opt/qt5/lib/cmake"]
+        # (Apple Silicon Homebrew installs qt@5 under /opt/homebrew; Intel Homebrew under /usr/local)
+        cmake_prefix_paths = [
+            "/usr/local/opt/qt5/lib/cmake",
+            "/opt/homebrew/opt/qt@5/lib/cmake",
+        ]
         conda_exe = shutil.which("conda")
         if conda_exe is not None:
             conda_info = json.loads(

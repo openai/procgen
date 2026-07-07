@@ -228,7 +228,7 @@ class StarPilotGame : public BasicAbstractGame {
 
         bool can_spawn_left = options.distribution_mode != EasyMode;
 
-        for (int i = 0; t <= SHOOTER_WIN_TIME; i++) {
+        for ([[maybe_unused]] int i = 0; t <= SHOOTER_WIN_TIME; i++) {
             int group_size = 1;
             float start_weight = rand_gen.rand01() * total_prob_weight;
             float curr_weight = start_weight;

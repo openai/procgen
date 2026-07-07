@@ -293,7 +293,7 @@ class ChaserGame : public BasicAbstractGame {
     void game_step() override {
         BasicAbstractGame::game_step();
 
-        int num_orbs = 0;
+        [[maybe_unused]] int num_orbs = 0;
         int num_enemies = 0;
 
         float default_enemy_speed = .5;
